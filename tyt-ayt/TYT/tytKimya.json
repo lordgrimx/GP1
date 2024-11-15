@@ -1,0 +1,26 @@
+{
+    "Lesson": "TYT Kimya",
+    "questionNumber": 40,
+    "Subjects": {
+      "Kimyasal Türler Arası Etkileşimler": "Orta",
+      "Atom ve Periyodik Sistem": "Orta",
+      "Kimya Bilimi": "Kolay",
+      "Maddenin Hâlleri": "Kolay",
+      "Doğa ve Kimya": "Kolay",
+      "Kimyanın Temel Kanunları ve Kimyasal Hesaplamalar": "Zor",
+      "Karışımlar": "Orta",
+      "Asitler, Bazlar ve Tuzlar": "Orta",
+      "Kimya Her Yerde": "Kolay",
+      "Kimyasal Tepkimelerde Enerji": "Orta",
+      "Kimyasal Tepkimelerde Hız": "Zor",
+      "Kimyasal Tepkimelerde Denge": "Zor",
+      "Modern Atom Teorisi": "Zor",
+      "Gazlar": "Orta",
+      "Sıvı Çözeltiler ve Çözünürlük": "Orta",
+      "Karbon Kimyasına Giriş": "Zor",
+      "Organik Bileşikler": "Zor",
+      "Kimya ve Elektrik": "Zor",
+      "Enerji Kaynakları ve Bilimsel Gelişmeler": "Orta"
+    }
+  }
+  

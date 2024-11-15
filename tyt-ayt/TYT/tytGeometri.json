@@ -1,0 +1,66 @@
+{
+    "Lesson": "TYT Geometri",
+    "questionNumber": 40,
+    "Subjects": {
+      "Temel Kavramlar": "Kolay",
+      "Doğruda Açılar": "Kolay",
+      "Üçgende Açılar": "Orta",
+      "Özel Üçgenler": {
+        "zorlukDerecesi": "Orta",
+        "türler": {
+          "Dik Üçgen": "Orta",
+          "İkizkenar Üçgen": "Kolay",
+          "Eşkenar Üçgen": "Kolay"
+        }
+      },
+      "Açıortay": "Orta",
+      "Kenarortay": "Orta",
+      "Eşlik ve Benzerlik": "Zor",
+      "Üçgende Alan": "Orta",
+      "Üçgende Benzerlik": "Zor",
+      "Açı Kenar Bağıntıları": "Zor",
+      "Çokgenler": "Orta",
+      "Özel Dörtgenler": {
+        "zorlukDerecesi": "Orta",
+        "türler": {
+          "Deltoid": "Orta",
+          "Paralelkenar": "Kolay",
+          "Eşkenar Dörtgen": "Kolay",
+          "Dikdörtgen": "Kolay",
+          "Kare": "Kolay",
+          "Yamuk": "Orta"
+        }
+      },
+      "Dörtgenler": "Orta",
+      "Çember ve Daire": {
+        "zorlukDerecesi": "Zor",
+        "türler": {
+          "Çemberde Açı": "Orta",
+          "Çemberde Uzunluk": "Orta",
+          "Dairede Çevre ve Alan": "Orta"
+        }
+      },
+      "Analitik Geometri": {
+        "zorlukDerecesi": "Zor",
+        "türler": {
+          "Noktanın Analitiği": "Orta",
+          "Doğrunun Analitiği": "Zor",
+          "Çemberin Analitiği": "Zor"
+        }
+      },
+      "Dönüşüm Geometrisi": "Zor",
+      "Katı Cisimler": {
+        "zorlukDerecesi": "Orta",
+        "türler": {
+          "Prizmalar": "Orta",
+          "Küp": "Kolay",
+          "Silindir": "Orta",
+          "Piramit": "Zor",
+          "Koni": "Orta",
+          "Küre": "Zor"
+        }
+      },
+      "Çemberin Analitiği": "Zor"
+    }
+  }
+  

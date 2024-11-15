@@ -1,0 +1,22 @@
+{
+    "Lesson": "TYT Din Kültürü ve Ahlak Bilgisi",
+    "questionNumber": 5,
+    "Subjects": {
+      "İnanç": "Kolay",
+      "İbadet": "Kolay",
+      "Ahlak ve Değerler": "Kolay",
+      "Din, Kültür ve Medeniyet": "Orta",
+      "Hz. Muhammed (S.A.V.)": "Orta",
+      "Vahiy ve Akıl": "Orta",
+      "Dünya ve Ahiret": "Orta",
+      "Kur’an'a göre Hz. Muhammed (S.A.V.)": "Orta",
+      "İnançla İlgili Meseleler": "Orta",
+      "Yahudilik ve Hristiyanlık": "Orta",
+      "İslam ve Bilim": "Zor",
+      "Anadolu’da İslam": "Orta",
+      "İslam Düşüncesinde Tasavvufi Yorumlar": "Zor",
+      "Güncel Dini Meseleler": "Orta",
+      "Hint ve Çin Dinleri": "Zor"
+    }
+  }
+  

@@ -1,0 +1,16 @@
+{
+    "Lesson": "TYT Felsefe",
+    "questionNumber": 5,
+    "Subjects": {
+      "Felsefenin Konusu": "Kolay",
+      "Bilgi Felsefesi": "Orta",
+      "Varlık Felsefesi": "Orta",
+      "Din, Kültür ve Medeniyet": "Kolay",
+      "Ahlak Felsefesi": "Orta",
+      "Sanat Felsefesi": "Orta",
+      "Din Felsefesi": "Orta",
+      "Siyaset Felsefesi": "Zor",
+      "Bilim Felsefesi": "Zor"
+    }
+  }
+  

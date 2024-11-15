@@ -1,0 +1,19 @@
+{
+    "Lesson": "TYT Fizik",
+    "questionNumber": 7,
+    "Subjects": {
+      "Fizik Bilimine Giriş": "Kolay",
+      "Madde ve Özellikleri": "Orta",
+      "Sıvıların Kaldırma Kuvveti": "Orta",
+      "Basınç": "Orta",
+      "Isı, Sıcaklık ve Genleşme": "Zor",
+      "Hareket ve Kuvvet": "Orta",
+      "Dinamik": "Zor",
+      "İş, Güç ve Enerji": "Orta",
+      "Elektrik": "Zor",
+      "Manyetizma": "Zor",
+      "Dalgalar": "Orta",
+      "Optik": "Zor"
+    }
+  }
+  

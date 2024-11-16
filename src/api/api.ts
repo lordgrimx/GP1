@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'http://localhost:3000/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -27,26 +27,21 @@ export const login = (username: string, password: string) =>
   api.post('/users/login', { username, password });
 
 // JSON formatında veri kabul eden kayıt fonksiyonu
-  export const register = async (data: {
-    username: string;
-    email: string;
-    password: string;
-    profileImage: string | null;
-    typeofintelligence: string;
-  }) => {
-    try {
-      const response = await api.post('/users/register', data, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      return response;
-    } catch (error) {
-      console.error('Kayıt sırasında hata oluştu:', error);
-      throw new Error('Kayıt işlemi başarısız oldu');
-    }
-  };
-
+export const register = async (data: {
+  username: string;
+  email: string;
+  password: string;
+  profileImage: string | null;
+  typeofintelligence: object;
+}) => {
+  try {
+    const response = await api.post('/users/register', data);
+    return response;
+  } catch (error) {
+    console.error('Kayıt sırasında hata oluştu:', error);
+    throw new Error('Kayıt işlemi başarısız oldu');
+  }
+};
 
 // Kullanıcı profilini alma fonksiyonu
 export const getUserProfile = () => api.get('/users/profile');
@@ -82,5 +77,23 @@ export const updateUserPassword = async (data: { oldPassword: string; newPasswor
     throw new Error('Şifre güncellenemedi');
   }
 };
+
+// Kullanıcı profil fotoğrafını güncelleme fonksiyonu
+export const updateUserProfilePicture = async (formData: FormData) => {
+  try {
+    const response = await api.put('/users/profile/photo', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error('Profil fotoğrafı güncellenirken hata oluştu:', error);
+    throw new Error('Profil fotoğrafı güncellenemedi');
+  }
+};
+
+// Kullanıcının zeka türlerini alma fonksiyonu
+export const getUserIntelligence = () => api.get('/users/intelligence');
 
 export default api;

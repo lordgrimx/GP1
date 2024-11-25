@@ -29,6 +29,7 @@ const Navbar: React.FC = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/');
+    window.location.reload(); // Sayfayı yeniler
   };
 
   const toggleDropdown = () => {
@@ -113,5 +114,12 @@ const Navbar: React.FC = () => {
     </nav>
   );
 };
+
+const NavLink: React.FC<{ to: string; icon: React.ReactNode; text: string }> = ({ to, icon, text }) => (
+  <Link to={to} className="flex items-center px-4 py-2 hover:bg-gray-100 transition-colors duration-200">
+    {icon}
+    <span className="ml-1">{text}</span>
+  </Link>
+);
 
 export default Navbar;

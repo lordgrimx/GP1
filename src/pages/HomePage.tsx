@@ -1,12 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, BarChart2, Users } from 'lucide-react';
+import CameraButton from '../components/CameraButton'; 
+
 
 const HomePage: React.FC = () => {
-  const token = localStorage.getItem('token');
+  const isAuthenticated = !!localStorage.getItem('token');
+
+  // Debug için environment variables'ı kontrol et
+  useEffect(() => {
+    console.log("Environment check:", {
+      apiKey: import.meta.env.VITE_API_KEY,
+      allEnv: import.meta.env
+    });
+  }, []);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 relative min-h-screen">
       <h1 className="text-4xl font-bold text-center mb-8">Welcome to YKS Assistant</h1>
       <p className="text-xl text-center mb-12">Your ultimate companion for YKS exam preparation</p>
       
@@ -29,12 +39,26 @@ const HomePage: React.FC = () => {
       </div>
       
       <div className="text-center mt-12">
-        {!token && (
+        {!isAuthenticated && (
           <Link to="/register" className="bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors duration-200">
             Get Started
           </Link>
         )}
       </div>
+
+      {isAuthenticated && (
+        <div className="fixed bottom-8 right-8 z-50">
+          {'AIzaSyDGdC1u1H0bJa4mtJHgOaJGSSKZzw8RRA0' ? (
+            <CameraButton 
+              apiKey={'AIzaSyDGdC1u1H0bJa4mtJHgOaJGSSKZzw8RRA0'}
+              model='gemini-1.5-flash'
+              className="..."
+            />
+          ) : (
+            <div>API Key is missing!</div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

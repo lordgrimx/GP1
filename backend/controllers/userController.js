@@ -108,10 +108,9 @@ export const updateUserProfilePhoto = async (req, res) => {
     }
 
     if (req.file) {
-      const base64Image = fs.readFileSync(req.file.path).toString('base64');
-      user.profileImage = `data:${req.file.mimetype};base64,${base64Image}`;
+      const base64Image = fs.readFileSync(req.file.path).toString('base64'); // Dosyayı Base64 formatına çevir
+      user.profileImage = `data:${req.file.mimetype};base64,${base64Image}`; // Base64 formatında kaydet
       await user.save();
-      fs.unlinkSync(req.file.path);
       res.json({ message: 'Profil fotoğrafı başarıyla güncellendi', profileImage: user.profileImage });
     } else {
       res.status(400).json({ message: 'Dosya yüklenmedi' });

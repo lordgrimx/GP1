@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { getTestTracks, addTestTrack, updateTestTrack, getSubjectNames } from '../api/api';
 import { PencilIcon } from '@heroicons/react/24/solid';
+import { showToast } from '../utils/toast';
 
 interface TestTrack {
   _id: string;
@@ -24,7 +24,7 @@ const TestTrackPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedExam, setSelectedExam] = useState<string>('');
   const [otherExamName, setOtherExamName] = useState<string>('');
-  const [examType, setExamType] = useState<string>('');
+  const [examType, setExamType] = useState<string>('TYT');
   const [subjectList, setSubjectList] = useState<string[]>([]);
   const [processedSubjects, setProcessedSubjects] = useState<string[]>([]);
   const [subjectQuestionCounts, setSubjectQuestionCounts] = useState<{ [key: string]: number }>({});
@@ -102,100 +102,119 @@ const TestTrackPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
+    // Define default subjects and their initial values
+    const defaultSubjects = {
+        "Türkçe": { correct: 0, incorrect: 0, empty: 0 },
+        "Matematik": { correct: 0, incorrect: 0, empty: 0 },
+        "Fen Bilgisi": { correct: 0, incorrect: 0, empty: 0 },
+        "Coğrafya": { correct: 0, incorrect: 0, empty: 0 },
+        "Tarih": { correct: 0, incorrect: 0, empty: 0 },
+        "Felsefe": { correct: 0, incorrect: 0, empty: 0 },
+        "Din Kültürü ve Ahlak Bilgisi": { correct: 0, incorrect: 0, empty: 0 },
+    };
+
     // Ders isimlerini ve eksik değerleri işlemek
     const completedSubjects = Object.keys(subjects).reduce((acc, subject) => {
-      // "TYT" önekini kaldır
-      let newSubject = subject.replace('TYT ', '');
-  
-      // Türkçe
-      if (newSubject === 'Türkçe') {
-        acc['Türkçe'] = {
-          correct: subjects[subject]?.correct || 0,
-          incorrect: subjects[subject]?.incorrect || 0,
-          empty: subjects[subject]?.empty || 0,
-        };
-      }
-  
-      // Matematik ve Geometri birleştirilir
-      if (['Matematik', 'Geometri'].includes(newSubject)) {
-        acc['Matematik'] = acc['Matematik'] || { correct: 0, incorrect: 0, empty: 0 };
-        acc['Matematik'].correct += subjects[subject]?.correct || 0;
-        acc['Matematik'].incorrect += subjects[subject]?.incorrect || 0;
-        acc['Matematik'].empty += subjects[subject]?.empty || 0;
-      }
-  
-      // Fen Bilgisi (Fizik + Kimya + Biyoloji) birleştirilir
-      if (['Fizik', 'Kimya', 'Biyoloji'].includes(newSubject)) {
-        acc['Fen Bilgisi'] = acc['Fen Bilgisi'] || { correct: 0, incorrect: 0, empty: 0 };
-        acc['Fen Bilgisi'].correct += subjects[subject]?.correct || 0;
-        acc['Fen Bilgisi'].incorrect += subjects[subject]?.incorrect || 0;
-        acc['Fen Bilgisi'].empty += subjects[subject]?.empty || 0;
-      }
-  
-      // Diğer dersler eklenir
-      if (!['Matematik', 'Geometri', 'Fizik', 'Kimya', 'Biyoloji', 'Türkçe'].includes(newSubject)) {
-        acc[newSubject] = {
-          correct: subjects[subject]?.correct || 0,
-          incorrect: subjects[subject]?.incorrect || 0,
-          empty: subjects[subject]?.empty || 0,
-        };
-      }
-  
-      return acc;
+        // "TYT" önekini kaldır
+        let newSubject = subject.replace('TYT ', '');
+
+        // Türkçe
+        if (newSubject === 'Türkçe') {
+            acc['Türkçe'] = {
+                correct: subjects[subject]?.correct || 0,
+                incorrect: subjects[subject]?.incorrect || 0,
+                empty: subjects[subject]?.empty || 0,
+            };
+        }
+
+        // Matematik ve Geometri birleştirilir
+        if (['Matematik', 'Geometri'].includes(newSubject)) {
+            acc['Matematik'] = acc['Matematik'] || { correct: 0, incorrect: 0, empty: 0 };
+            acc['Matematik'].correct += subjects[subject]?.correct || 0;
+            acc['Matematik'].incorrect += subjects[subject]?.incorrect || 0;
+            acc['Matematik'].empty += subjects[subject]?.empty || 0;
+        }
+
+        // Fen Bilgisi (Fizik + Kimya + Biyoloji) birleştirilir
+        if (['Fizik', 'Kimya', 'Biyoloji'].includes(newSubject)) {
+            acc['Fen Bilgisi'] = acc['Fen Bilgisi'] || { correct: 0, incorrect: 0, empty: 0 };
+            acc['Fen Bilgisi'].correct += subjects[subject]?.correct || 0;
+            acc['Fen Bilgisi'].incorrect += subjects[subject]?.incorrect || 0;
+            acc['Fen Bilgisi'].empty += subjects[subject]?.empty || 0;
+        }
+
+        // Diğer dersler eklenir
+        if (!['Matematik', 'Geometri', 'Fizik', 'Kimya', 'Biyoloji', 'Türkçe'].includes(newSubject)) {
+            acc[newSubject] = {
+                correct: subjects[subject]?.correct || 0,
+                incorrect: subjects[subject]?.incorrect || 0,
+                empty: subjects[subject]?.empty || 0,
+            };
+        }
+
+        return acc;
     }, {} as { [key: string]: { correct: number; incorrect: number; empty: number } });
-  
-    console.log('İşlenmiş ve tamamlanmış ders isimleri ve değerler:', completedSubjects);
-  
-    for (const [subject, { correct, incorrect, empty }] of Object.entries(completedSubjects)) {
-      const totalCount = correct + incorrect + empty;
-  
-      if (totalCount > questionNumber[subject]) {
-        alert(
-          `${subject} için toplam soru sayısı (${totalCount}), beklenen soru sayısını (${questionNumber[subject]}) aşıyor.`
-        );
-        return;
-      }
-  
-      if (correct < 0 || incorrect < 0 || empty < 0) {
-        alert('Doğru, yanlış veya boş soru sayısı negatif olamaz');
-        return;
-      }
+
+    // Ensure all default subjects are present
+    for (const [defaultSubject, defaultValues] of Object.entries(defaultSubjects)) {
+        if (!completedSubjects[defaultSubject]) {
+            completedSubjects[defaultSubject] = defaultValues;
+        }
     }
-  
-    const data = {
-      examName: selectedExam === 'Other' ? otherExamName : selectedExam,
-      examType,
-      subjects: completedSubjects, // Tamamlanmış subjects kullanılıyor
-    };
-  
+
+    console.log('İşlenmiş ve tamamlanmış ders isimleri ve değerler:', completedSubjects);
+
+    for (const [subject, { correct, incorrect, empty }] of Object.entries(completedSubjects)) {
+        const totalCount = correct + incorrect + empty;
+
+        if (totalCount > questionNumber[subject]) {
+            alert(
+                `${subject} için toplam soru sayısı (${totalCount}), beklenen soru sayısını (${questionNumber[subject]}) aşıyor.`
+            );
+            return;
+        }
+
+        if (correct < 0 || incorrect < 0 || empty < 0) {
+            alert('Doğru, yanlış veya boş soru sayısı negatif olamaz');
+            return;
+        }
+    }
+
     try {
+      // Ensure all default subjects are present
+      const finalSubjects = { ...defaultSubjects, ...completedSubjects };
+
+      const finalData = {
+        examName: selectedExam === 'Other' ? otherExamName : selectedExam,
+        examType,
+        subjects: finalSubjects,
+      };
+
       if (editingId) {
-        await updateTestTrack(editingId, data);
-        alert('Deneme başarıyla güncellendi.');
+        await updateTestTrack(editingId, finalData);
+        showToast.success('Deneme sonuçları başarıyla güncellendi!');
       } else {
-        await addTestTrack(data);
-        alert('Deneme başarıyla eklendi.');
+        await addTestTrack(finalData);
+        showToast.success('Deneme sonuçları başarıyla kaydedildi!');
       }
-  
+
+      // Reset form
       setExamName('');
       setSubjects({});
       setEditingId(null);
       setIsModalOpen(false);
-  
+      setSelectedExam('');
+      setOtherExamName('');
+      setExamType('TYT');
+
+      // Refresh test tracks
       const response = await getTestTracks();
       setTestTracks(response.data);
+
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('Axios error:', error.response?.data || error.message);
-        alert(error.response?.data?.message || 'Deneme kaydedilirken bir hata oluştu.');
-      } else if (error instanceof Error) {
-        console.error('Genel hata:', error.message);
-        alert('Deneme kaydedilirken bir hata oluştu: ' + error.message);
-      } else {
-        console.error('Bilinmeyen hata:', error);
-        alert('Bilinmeyen bir hata oluştu.');
-      }
+      console.error('Error submitting test track:', error);
+      showToast.error('Deneme sonuçları kaydedilirken bir hata oluştu!');
     }
   };
   

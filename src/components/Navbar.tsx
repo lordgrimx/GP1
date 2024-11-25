@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, Home, LogIn, UserPlus, LayoutDashboard, User, LogOut, ChevronDown } from 'lucide-react';
-import { getUserProfile } from '../api/api'; // Kullanıcı verilerini almak için import edin
+import { Link, useNavigate, NavLink as RouterNavLink } from 'react-router-dom';
+import { BookOpen, User, LogOut, ChevronDown, UserPlus, LogIn } from 'lucide-react';
+import { getUserProfile } from '../api/api';
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [username, setUsername] = useState('');
-  const [profileImage, setProfileImage] = useState<string | null>(null); // Profil resmi için state ekleyin
+  const [profileImage, setProfileImage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const response = await getUserProfile();
         setUsername(response.data.username);
-        setProfileImage(response.data.profileImage); // Profil resmini state'e kaydedin
+        setProfileImage(response.data.profileImage);
       } catch (err) {
         console.error('Error fetching user data:', err);
       }
@@ -63,19 +63,32 @@ const Navbar: React.FC = () => {
                   <img
                     src={profileImage}
                     alt="Profile"
-                    className="w-10 h-10 rounded-full mr-2" // Daire şeklinde profil resmi
+                    className="w-10 h-10 rounded-full mr-2"
                   />
                 ) : (
-                  <User size={18} className="mr-2" /> // Varsayılan ikon
+                  <User size={18} className="mr-2" />
                 )}
-                <span>{username}</span> {/* Dinamik kullanıcı adı */}
+                <span>{username}</span>
                 <ChevronDown size={18} className="ml-2" />
               </div>
               {dropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded-md shadow-lg z-10">
-                  <NavLink to="/subjects" icon={<BookOpen size={18} />} text="Subjects" />
-                  <NavLink to="/dashboard" icon={<LayoutDashboard size={18} />} text="Dashboard" />
-                  <NavLink to="/profile" icon={<User size={18} />} text="Profile" />
+                  <RouterNavLink to="/subjects" className="flex items-center px-4 py-2 hover:bg-gray-100 transition-colors duration-200">
+                    <BookOpen size={18} />
+                    <span className="ml-1">Subjects</span>
+                  </RouterNavLink>
+                  <RouterNavLink to="/dashboard" className="flex items-center px-4 py-2 hover:bg-gray-100 transition-colors duration-200">
+                    <User size={18} />
+                    <span className="ml-1">Dashboard</span>
+                  </RouterNavLink>
+                  <RouterNavLink to="/profile" className="flex items-center px-4 py-2 hover:bg-gray-100 transition-colors duration-200">
+                    <User size={18} />
+                    <span className="ml-1">Profile</span>
+                  </RouterNavLink>
+                  <RouterNavLink to="/testtrack" className="flex items-center px-4 py-2 hover:bg-gray-100 transition-colors duration-200">
+                    <BookOpen size={18} />
+                    <span className="ml-1">Sınav Takibi</span>
+                  </RouterNavLink>
                   <button onClick={handleLogout} className="flex items-center w-full px-4 py-2 hover:bg-gray-100">
                     <LogOut size={18} />
                     <span className="ml-1">Logout</span>
@@ -85,8 +98,14 @@ const Navbar: React.FC = () => {
             </div>
           ) : (
             <>
-              <NavLink to="/login" icon={<LogIn size={18} />} text="Login" />
-              <NavLink to="/register" icon={<UserPlus size={18} />} text="Register" />
+              <RouterNavLink to="/login" className="flex items-center px-4 py-2 hover:bg-gray-100 transition-colors duration-200">
+                <LogIn size={18} />
+                <span className="ml-1">Login</span>
+              </RouterNavLink>
+              <RouterNavLink to="/register" className="flex items-center px-4 py-2 hover:bg-gray-100 transition-colors duration-200">
+                <UserPlus size={18} />
+                <span className="ml-1">Register</span>
+              </RouterNavLink>
             </>
           )}
         </div>
@@ -94,12 +113,5 @@ const Navbar: React.FC = () => {
     </nav>
   );
 };
-
-const NavLink: React.FC<{ to: string; icon: React.ReactNode; text: string }> = ({ to, icon, text }) => (
-  <Link to={to} className="flex items-center px-4 py-2 hover:bg-gray-100 transition-colors duration-200">
-    {icon}
-    <span className="ml-1">{text}</span>
-  </Link>
-);
 
 export default Navbar;

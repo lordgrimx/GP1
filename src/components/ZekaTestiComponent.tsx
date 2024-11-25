@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
-const ZekaTestiComponent: React.FC = () => {
+interface ZekaTestiComponentProps {
+  username: string;
+  email: string;
+  password: string;
+  profileImage: string | null;
+  onSubmit: (sonuc: any) => void;
+}
+
+const ZekaTestiComponent: React.FC<ZekaTestiComponentProps> = ({ username, email, password, profileImage, onSubmit }) => {
     const adimlar = [
         [
           "Yazılar, görsellerden daha fazla dikkatimi çeker.",
@@ -102,7 +109,7 @@ const ZekaTestiComponent: React.FC = () => {
       ];
   const [adim, setAdim] = useState<number>(0);
   const [cevaplar, setCevaplar] = useState<(number | undefined)[]>(Array(adimlar[adim].length).fill(undefined));
-  const [puanlar, setPuanlar] = useState<number[]>(Array(adimlar.length).fill(0));
+  const [puanlar, setPuanlar] = useState<number[]>(Array(adimlar.length).fill(undefined));
   const navigate = useNavigate();
 
   const handleCevap = (index: number, deger: number) => {
@@ -134,7 +141,7 @@ const ZekaTestiComponent: React.FC = () => {
     return adimCevaplar.reduce((a, b) => a + (b || 0), 0);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     const sonuc = {
       "Sözel - Dilsel Zeka": puanlar[0] || 0,
       "Matematiksel - Mantıksal Zeka": puanlar[1] || 0,
@@ -145,15 +152,8 @@ const ZekaTestiComponent: React.FC = () => {
       "Bedensel - Kinestetik Zeka": puanlar[6] || 0,
       "İçsel Zeka": puanlar[7] || 0
     };
-
-    try {
-      await axios.post('http://localhost:5000/api/register', {
-        typeofintelligence: JSON.stringify(sonuc)
-      });
-      navigate('/dashboard');
-    } catch (error) {
-      console.error("Sonuç kaydedilirken bir hata oluştu:", error);
-    }
+    onSubmit(sonuc);
+    navigate('/register');
   };
 
   const allQuestionsAnswered = cevaplar.every((cevap) => cevap !== undefined);

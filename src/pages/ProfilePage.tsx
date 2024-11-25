@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 //import { Lock } from 'lucide-react';
-import { getUserProfile, updateUserPassword, updateUserProfile } from '../api/api';
+import { getUserProfile, updateUserPassword, updateUserProfile, updateUserProfilePicture } from '../api/api';
 
 const ProfilePage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -57,6 +57,20 @@ const ProfilePage: React.FC = () => {
           setError('Failed to update profile photo');
         }
       };
+    }
+  };
+
+  const handleProfileImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files ? e.target.files[0] : null;
+    if (file) {
+      const formData = new FormData();
+      formData.append('profileImage', file);
+      try {
+        await updateUserProfilePicture(formData);
+        setSuccess('Profil fotoğrafı başarıyla güncellendi.');
+      } catch (err) {
+        setError('Profil fotoğrafı güncellenemedi.');
+      }
     }
   };
 
@@ -141,7 +155,7 @@ const ProfilePage: React.FC = () => {
                 type="file"
                 id="profileImage"
                 accept="image/*"
-                onChange={(e) => setProfileImage(e.target.files ? e.target.files[0] : null)}
+                onChange={handleProfileImageChange}
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               />
             </div>

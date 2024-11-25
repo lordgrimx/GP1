@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const subjectSchema = new mongoose.Schema({
-  lesson: { type: String, required: true },
+  Lesson: { type: String, required: true },
   questionNumber: { type: Number, required: true },
   subjects: {
     type: Map,

@@ -46,11 +46,15 @@ export const register = async (data: {
 // Kullanıcı profilini alma fonksiyonu
 export const getUserProfile = () => api.get('/users/profile');
 
-// Konuları alma fonksiyonu
+// Dersler API'leri
 export const getSubjects = () => api.get('/subjects');
-
-// Belirli bir konuyu ID ile alma fonksiyonu
 export const getSubjectById = (id: string) => api.get(`/subjects/${id}`);
+export const addSubject = (data: { lesson: string; questionNumber: number; subjects?: Map<string, string> }) =>
+  api.post('/subjects', data);
+export const updateSubject = (id: string, data: { lesson?: string; questionNumber?: number; subjects?: Map<string, string> }) =>
+  api.put(`/subjects/${id}`, data);
+export const deleteSubject = (id: string) => api.delete(`/subjects/${id}`);
+export const getSubjectNames = () => api.get('/subjects/names');
 
 // Kullanıcı profilini JSON formatında güncelleme fonksiyonu
 export const updateUserProfile = async (data: { profileImage?: string }) => {
@@ -95,5 +99,18 @@ export const updateUserProfilePicture = async (formData: FormData) => {
 
 // Kullanıcının zeka türlerini alma fonksiyonu
 export const getUserIntelligence = () => api.get('/users/intelligence');
+
+// Test Track API'leri
+export const getTestTracks = () => api.get('/testtrack');
+export const addTestTrack = (data: {
+  examName: string;
+  examType: string;
+  subjects: { [key: string]: { correct: number; incorrect: number; empty: number } };
+}) => api.post('/testtrack', data);
+export const updateTestTrack = (id: string, data: {
+  examName: string;
+  examType: string;
+  subjects: { [key: string]: { correct: number; incorrect: number; empty: number } };
+}) => api.put(`/testtrack/${id}`, data);
 
 export default api;

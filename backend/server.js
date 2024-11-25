@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import userRoutes from './routes/userRoutes.js';
 import subjectRoutes from './routes/subjectRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
+import testTrackRoutes from './routes/testTrackRoutes.js';
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ mongoose.connect(process.env.MONGODB_URI)
 app.use('/api/users', userRoutes);
 app.use('/api/subjects', subjectRoutes);
 app.use('/api/quizzes', quizRoutes);
+app.use('/api/testtrack', testTrackRoutes);
 
 const PORT = process.env.PORT || 5000;
 

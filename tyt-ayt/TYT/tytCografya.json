@@ -1,0 +1,26 @@
+{
+    "Lesson": "TYT Coğrafya",
+    "questionNumber": 5,
+    "Subjects": {
+      "Doğa ve İnsan": "Kolay",
+      "Dünya’nın Şekli ve Hareketleri": "Kolay",
+      "Coğrafi Konum": "Orta",
+      "Harita Bilgisi": "Orta",
+      "Atmosfer ve Sıcaklık": "Orta",
+      "İklimler": "Orta",
+      "Basınç ve Rüzgarlar": "Zor",
+      "Nem, Yağış ve Buharlaşma": "Zor",
+      "İç Kuvvetler / Dış Kuvvetler": "Orta",
+      "Su – Toprak ve Bitkiler": "Orta",
+      "Nüfus": "Kolay",
+      "Göç": "Orta",
+      "Yerleşme": "Orta",
+      "Türkiye’nin Yer Şekilleri": "Zor",
+      "Ekonomik Faaliyetler": "Orta",
+      "Bölgeler": "Orta",
+      "Uluslararası Ulaşım Hatları": "Zor",
+      "Çevre ve Toplum": "Kolay",
+      "Doğal Afetler": "Orta"
+    }
+  }
+  

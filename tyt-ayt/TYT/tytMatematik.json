@@ -1,0 +1,42 @@
+{
+    "Lesson": "TYT Matematik",
+    "questionNumber": 40,
+    "Subjects": {
+      "Temel Kavramlar": "Kolay",
+      "Sayı Basamakları": "Kolay",
+      "Bölme ve Bölünebilme": "Orta",
+      "EBOB – EKOK": "Orta",
+      "Rasyonel Sayılar": "Kolay",
+      "Basit Eşitsizlikler": "Orta",
+      "Mutlak Değer": "Zor",
+      "Üslü Sayılar": "Orta",
+      "Köklü Sayılar": "Orta",
+      "Çarpanlara Ayırma": "Zor",
+      "Oran Orantı": "Orta",
+      "Denklem Çözme": "Orta",
+      "Problemler": {
+        "zorlukDerecesi": "Zor",
+        "türler": {
+          "Sayı Problemleri": "Orta",
+          "Kesir Problemleri": "Kolay",
+          "Yaş Problemleri": "Orta",
+          "Hareket Hız Problemleri": "Zor",
+          "İşçi Emek Problemleri": "Orta",
+          "Yüzde Problemleri": "Kolay",
+          "Kar Zarar Problemleri": "Orta",
+          "Karışım Problemleri": "Orta",
+          "Grafik Problemleri": "Zor",
+          "Rutin Olmayan Problemler": "Zor"
+        }
+      },
+      "Kümeler – Kartezyen Çarpım": "Orta",
+      "Mantık": "Orta",
+      "Fonksiyonlar": "Zor",
+      "Polinomlar": "Orta",
+      "2. Dereceden Denklemler": "Orta",
+      "Permütasyon ve Kombinasyon": "Zor",
+      "Olasılık": "Orta",
+      "Veri – İstatistik": "Kolay"
+    }
+  }
+  

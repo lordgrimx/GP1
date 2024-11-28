@@ -1,0 +1,32 @@
+{
+    "Lesson": "AYT Fizik",
+    "questionNumber": 40,
+    "Subjects": {
+      "Vektörler": "Kolay",
+      "Kuvvet, Tork ve Denge": "Orta",
+      "Kütle Merkezi": "Kolay",
+      "Basit Makineler": "Kolay",
+      "Hareket": "Orta",
+      "Newton’un Hareket Yasaları": "Orta",
+      "İş, Güç ve Enerji II": "Orta",
+      "Atışlar": "Orta",
+      "İtme ve Momentum": "Zor",
+      "Elektrik Alan ve Potansiyel": "Zor",
+      "Paralel Levhalar ve Sığa": "Orta",
+      "Manyetik Alan ve Manyetik Kuvvet": "Zor",
+      "İndüksiyon, Alternatif Akım ve Transformatörler": "Zor",
+      "Çembersel Hareket": "Orta",
+      "Dönme, Yuvarlanma ve Açısal Momentum": "Zor",
+      "Kütle Çekim ve Kepler Yasaları": "Zor",
+      "Basit Harmonik Hareket": "Orta",
+      "Dalga Mekaniği ve Elektromanyetik Dalgalar": "Zor",
+      "Atom Modelleri": "Orta",
+      "Büyük Patlama ve Parçacık Fiziği": "Zor",
+      "Radyoaktivite": "Orta",
+      "Özel Görelilik": "Zor",
+      "Kara Cisim Işıması": "Zor",
+      "Fotoelektrik Olay ve Compton Olayı": "Zor",
+      "Modern Fiziğin Teknolojideki Uygulamaları": "Orta"
+    }
+  }
+  

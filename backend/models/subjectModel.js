@@ -6,6 +6,11 @@ const subjectSchema = new mongoose.Schema({
   subjects: {
     type: Map,
     of: String
+  },
+  proficiencyLevels: {
+    type: Map,
+    of: Number,
+    default: new Map()
   }
 }, { timestamps: true });
 

@@ -1,0 +1,29 @@
+{
+    "Lesson": "AYT Kimya",
+    "questionNumber": 40,
+    "Subjects": {
+      "Kimya Bilimi": "Kolay",
+      "Atom ve Periyodik Sistem": "Kolay",
+      "Kimyasal Türler Arası Etkileşimler": "Orta",
+      "Kimyasal Hesaplamalar": "Orta",
+      "Kimyanın Temel Kanunları": "Orta",
+      "Asit, Baz ve Tuz": "Kolay",
+      "Maddenin Halleri": "Kolay",
+      "Karışımlar": "Kolay",
+      "Doğa ve Kimya": "Kolay",
+      "Kimya Her Yerde": "Kolay",
+      "Modern Atom Teorisi": "Orta",
+      "Gazlar": "Orta",
+      "Sıvı Çözeltiler": "Orta",
+      "Kimyasal Tepkimelerde Enerji": "Orta",
+      "Kimyasal Tepkimelerde Hız": "Zor",
+      "Kimyasal Tepkimelerde Denge": "Zor",
+      "Asit-Baz Dengesi": "Zor",
+      "Çözünürlük Dengesi": "Zor",
+      "Kimya ve Elektrik": "Zor",
+      "Organik Kimyaya Giriş": "Orta",
+      "Organik Kimya": "Zor",
+      "Enerji Kaynakları ve Bilimsel Gelişmeler": "Orta"
+    }
+  }
+  

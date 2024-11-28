@@ -1,33 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { useTheme } from '../context/ThemeContext';
+import { Book, Calculator, BeakerIcon, Globe, Brain } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { getSubjects } from '../api/api';
-import LoadingSpinner from '../components/LoadingSpinner';
-import ErrorMessage from '../components/ErrorMessage';
-import { ChevronDown } from 'lucide-react';
 
 interface Subject {
   _id: string;
   Lesson: string;
   questionNumber: number;
-  Subjects: { [key: string]: string | { zorlukDerecesi: string; türler: { [key: string]: string } } };
+  Subjects: {
+    [key: string]: string | { [key: string]: string };
+  };
 }
 
 const SubjectsPage: React.FC = () => {
+  const { theme } = useTheme();
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [openSubjectId, setOpenSubjectId] = useState<string | null>(null);
-  const [knowledgeLevel, setKnowledgeLevel] = useState<{ [key: string]: number }>({});
-  const [showSlider, setShowSlider] = useState<string | null>(null);
-  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
         const response = await getSubjects();
         setSubjects(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to load subjects');
+      } catch (error) {
+        console.error('Error fetching subjects:', error);
+      } finally {
         setLoading(false);
       }
     };
@@ -35,93 +34,102 @@ const SubjectsPage: React.FC = () => {
     fetchSubjects();
   }, []);
 
-  const toggleSubject = (id: string) => {
-    setOpenSubjectId(openSubjectId === id ? null : id);
-    setShowSlider(null);
-  };
-
-  const handleKnowledgeChange = (topic: string, value: number) => {
-    setKnowledgeLevel({ ...knowledgeLevel, [topic]: value });
-  };
-
-  const handleSliderToggle = (topic: string) => {
-    if (showSlider === topic) {
-      setShowSlider(null);
-    } else {
-      setShowSlider(topic);
-      setSelectedTopic(topic);
+  const getSubjectIcon = (lessonName: string) => {
+    switch (lessonName) {
+      case 'TYT Türkçe':
+        return <Book className="w-8 h-8" />;
+      case 'TYT Matematik':
+        return <Calculator className="w-8 h-8" />;
+      case 'TYT Fizik':
+      case 'TYT Kimya':
+      case 'TYT Biyoloji':
+        return <BeakerIcon className="w-8 h-8" />;
+      case 'TYT Tarih':
+      case 'TYT Coğrafya':
+        return <Globe className="w-8 h-8" />;
+      case 'TYT Felsefe':
+        return <Brain className="w-8 h-8" />;
+      default:
+        return <Book className="w-8 h-8" />;
     }
   };
 
-  const handleExplain = () => {
-    if (selectedTopic) {
-      const knowledge = knowledgeLevel[selectedTopic] || 0;
-      const prompt = `Lütfen "${selectedTopic}" konusunu ${knowledge}% bilgi seviyesinde bir lise öğrencisine anlatın.`;
-      console.log(prompt);
+  const getSubjectColor = (lessonName: string) => {
+    switch (lessonName) {
+      case 'TYT Türkçe': return 'blue';
+      case 'TYT Matematik': return 'red';
+      case 'TYT Fizik': return 'purple';
+      case 'TYT Kimya': return 'green';
+      case 'TYT Biyoloji': return 'pink';
+      case 'TYT Tarih': return 'yellow';
+      case 'TYT Coğrafya': return 'indigo';
+      case 'TYT Felsefe': return 'orange';
+      default: return 'gray';
     }
   };
 
-  if (loading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage message={error} />;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">YKS Subjects</h1>
-      <div className="flex flex-col gap-4">
-        {subjects.map((subject) => (
-          <div key={subject._id} className="bg-white p-6 rounded-lg shadow-md mb-4">
-            <div
-              className="flex justify-between items-center cursor-pointer hover:bg-gray-50 p-4"
-              onClick={() => toggleSubject(subject._id)}
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      {/* Hero Section */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center mb-12 px-4"
+      >
+        <h1 className={`text-4xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          YKS Konu Anlatımları
+        </h1>
+        <p className={`text-lg ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+          Detaylı konu anlatımları ve soru çözümleriyle YKS'ye hazırlanın
+        </p>
+      </motion.div>
+
+      {/* Subjects Grid */}
+      <motion.div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {subjects.map((subject) => (
+            <motion.div
+              key={subject._id}
+              whileHover={{ scale: 1.03 }}
+              className={`p-6 rounded-xl shadow-lg ${
+                theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50'
+              } transition-all duration-300`}
             >
-              <h2 className="text-xl font-semibold w-full">{subject.Lesson}</h2>
-              <ChevronDown className={`transition-transform ${openSubjectId === subject._id ? 'rotate-180' : ''}`} />
-            </div>
-            {openSubjectId === subject._id && (
-              <div className="grid grid-cols-2 gap-4">
-                {Object.entries(subject.Subjects).map(([topic, value]) => (
-                  <div key={topic} className="flex flex-col text-gray-600 p-2 border-b">
-                    <div className="flex justify-between items-center">
-                      <span>{topic}</span>
-                      <div className="flex items-center">
-                        <div className={`w-3 h-3 rounded-full ${typeof value === 'string' ? (value === 'Kolay' ? 'bg-green-500' : value === 'Orta' ? 'bg-yellow-500' : 'bg-red-500') : 'bg-gray-500'}`}></div>
-                        <button
-                          className="ml-2 text-blue-500"
-                          onClick={() => handleSliderToggle(topic)}
-                        >
-                          Konu Anlatımı
-                        </button>
-                      </div>
-                    </div>
-                    {showSlider === topic && (
-                      <div className="mt-2">
-                        <h3 className="text-lg">Bu konuya ne kadar hakimsin?</h3>
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          value={knowledgeLevel[topic] || 0}
-                          onChange={(e) => handleKnowledgeChange(topic, Number(e.target.value))}
-                          className="w-full"
-                        />
-                        <span>{knowledgeLevel[topic] || 0}%</span>
-                        <div className="flex justify-end mt-2">
-                          <button
-                            className="bg-blue-500 text-white py-1 px-3 rounded"
-                            onClick={handleExplain}
-                          >
-                            Açıklama Oluştur
-                          </button>
-                        </div>
-                      </div>
-                    )}
+              <Link to={`/subjects/${subject._id}`} className="block">
+                <div className="flex items-start space-x-4">
+                  <div className={`p-3 rounded-full bg-${getSubjectColor(subject.Lesson)}-100 dark:bg-${getSubjectColor(subject.Lesson)}-900/30`}>
+                    {getSubjectIcon(subject.Lesson)}
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+                  <div>
+                    <h3 className={`text-xl font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      {subject.Lesson}
+                    </h3>
+                    <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                      {`${Object.keys(subject.Subjects).length} konu, ${subject.questionNumber} soru`}
+                    </p>
+                    <div className="mt-4 flex items-center text-blue-500">
+                      <span className="text-sm font-medium">Konuları Gör</span>
+                      <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Stats Section aynı kalabilir */}
     </div>
   );
 };

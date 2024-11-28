@@ -6,17 +6,31 @@ import {
   updateSubject,
   deleteSubject,
   getSubjectNames,
+  getTYTSubjects,
+  getAYTSubjects,
+  updateSubjectProficiency
 } from '../controllers/subjectController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/', protect, getSubjects); // Tüm dersleri getir
-router.post('/', protect, addSubject); // Yeni ders ekle
-router.get('/names', protect, getSubjectNames);// Sadece ders adlarını getir
-router.get('/:id', protect, getSubjectById); // Belirli bir dersi ID ile getir
-router.put('/:id', protect, updateSubject); // Belirli bir dersi güncelle
-router.delete('/:id', protect, deleteSubject); // Belirli bir dersi sil
- 
+// Tüm route'ları protect middleware'i ile koruyalım
+router.use(protect);
+
+// Artık her route korunuyor
+router.route('/')
+  .get(getSubjects)
+  .post(addSubject);
+
+router.get('/names', getSubjectNames);
+router.get('/tyt', getTYTSubjects);
+router.get('/ayt', getAYTSubjects);
+
+router.route('/:id')
+  .get(getSubjectById)
+  .put(updateSubject)
+  .delete(deleteSubject);
+
+router.post('/:id/proficiency', updateSubjectProficiency);
 
 export default router;

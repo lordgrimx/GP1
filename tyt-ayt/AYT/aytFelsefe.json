@@ -1,0 +1,55 @@
+{
+    "Lesson": "AYT Felsefe",
+    "questionNumber": 40,
+    "Subjects": {
+      "Felsefe": {
+        "zorlukDerecesi": "Orta",
+        "konular": {
+          "Felsefe’nin Konusu": "Kolay",
+          "Bilgi Felsefesi": "Orta",
+          "Varlık Felsefesi": "Orta",
+          "Ahlak Felsefesi": "Orta",
+          "Sanat Felsefesi": "Orta",
+          "Din Felsefesi": "Orta",
+          "Siyaset Felsefesi": "Zor",
+          "Bilim Felsefesi": "Zor",
+          "İlk Çağ Felsefesi": "Kolay",
+          "MÖ 6. Yüzyıl – MS 2. Yüzyıl Felsefesi": "Orta",
+          "MS 2. Yüzyıl – MS 15. Yüzyıl Felsefesi": "Orta",
+          "15. Yüzyıl – 17. Yüzyıl Felsefesi": "Orta",
+          "18. Yüzyıl – 19. Yüzyıl Felsefesi": "Zor",
+          "20. Yüzyıl Felsefesi": "Zor"
+        }
+      },
+      "Mantık": {
+        "zorlukDerecesi": "Orta",
+        "konular": {
+          "Mantığa Giriş": "Kolay",
+          "Klasik Mantık": "Kolay",
+          "Mantık ve Dil": "Orta",
+          "Sembolik Mantık": "Zor"
+        }
+      },
+      "Psikoloji": {
+        "zorlukDerecesi": "Orta",
+        "konular": {
+          "Psikoloji Bilimini Tanıyalım": "Kolay",
+          "Psikolojinin Temel Süreçleri": "Orta",
+          "Öğrenme Bellek Düşünme": "Orta",
+          "Ruh Sağlığının Temelleri": "Orta"
+        }
+      },
+      "Sosyoloji": {
+        "zorlukDerecesi": "Orta",
+        "konular": {
+          "Sosyolojiye Giriş": "Kolay",
+          "Birey ve Toplum": "Kolay",
+          "Toplumsal Yapı": "Orta",
+          "Toplumsal Değişme ve Gelişme": "Orta",
+          "Toplum ve Kültür": "Orta",
+          "Toplumsal Kurumlar": "Orta"
+        }
+      }
+    }
+  }
+  

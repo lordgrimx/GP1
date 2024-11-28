@@ -99,4 +99,81 @@ export const getSubjectNames = async (req, res) => {
   }
 };
 
+// TYT derslerini getir
+export const getTYTSubjects = async (req, res) => {
+  try {
+    const subjects = await Subject.find({
+      Lesson: { $regex: '^TYT', $options: 'i' }
+    }).select('Lesson questionNumber subjects');
+    
+    if (!subjects || subjects.length === 0) {
+      return res.status(404).json({ message: 'TYT dersleri bulunamadı' });
+    }
+    
+    res.json(subjects);
+  } catch (error) {
+    console.error('TYT dersleri getirilirken hata:', error);
+    res.status(500).json({ 
+      message: 'TYT dersleri alınırken bir hata oluştu', 
+      error: error.message 
+    });
+  }
+};
+
+// AYT derslerini getir
+export const getAYTSubjects = async (req, res) => {
+  try {
+    const subjects = await Subject.find({
+      Lesson: { $regex: '^AYT', $options: 'i' }
+    }).select('Lesson questionNumber subjects');
+    
+    if (!subjects || subjects.length === 0) {
+      return res.status(404).json({ message: 'AYT dersleri bulunamadı' });
+    }
+    
+    res.json(subjects);
+  } catch (error) {
+    console.error('AYT dersleri getirilirken hata:', error);
+    res.status(500).json({ 
+      message: 'AYT dersleri alınırken bir hata oluştu', 
+      error: error.message 
+    });
+  }
+};
+
+// Yeni controller fonksiyonu
+export const updateSubjectProficiency = async (req, res) => {
+  try {
+    const { topicName, level } = req.body;
+    const subject = await Subject.findById(req.params.id);
+
+    if (!subject) {
+      return res.status(404).json({ message: 'Konu bulunamadı' });
+    }
+
+    // Eğer proficiencyLevels henüz oluşturulmadıysa, yeni bir Map oluştur
+    if (!subject.proficiencyLevels) {
+      subject.proficiencyLevels = new Map();
+    }
+
+    // Proficiency seviyesini güncelle
+    subject.proficiencyLevels.set(topicName, level);
+    
+    // Değişiklikleri kaydet
+    await subject.save();
+
+    res.json({ 
+      message: 'Seviye başarıyla güncellendi',
+      level: level,
+      topicName: topicName
+    });
+  } catch (error) {
+    console.error('Seviye güncellenirken hata:', error);
+    res.status(500).json({ 
+      message: 'Server error',
+      error: error.message 
+    });
+  }
+};
+
 

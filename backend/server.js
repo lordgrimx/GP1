@@ -7,6 +7,9 @@ import userRoutes from './routes/userRoutes.js';
 import subjectRoutes from './routes/subjectRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
 import testTrackRoutes from './routes/testTrackRoutes.js';
+import studySessionRoutes from './routes/studySessionRoutes.js';
+import testResultRoutes from './routes/testResultRoutes.js';
+import questionRoutes from './routes/questionRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -74,6 +77,9 @@ app.use('/api/users', userRoutes);
 app.use('/api/subjects', subjectRoutes);
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/testtrack', testTrackRoutes);
+app.use('/api/study-sessions', studySessionRoutes);
+app.use('/api/test-results', testResultRoutes);
+app.use('/api/questions', questionRoutes);
 
 const PORT = process.env.PORT || 5000;
 

@@ -1,0 +1,54 @@
+{
+    "Lesson": "AYT Coğrafya",
+    "questionNumber": 40,
+    "Subjects": {
+      "Ekosistem": "Kolay",
+      "Biyoçeşitlilik": "Kolay",
+      "Biyomlar": "Orta",
+      "Ekosistemin Unsurları": "Orta",
+      "Enerji Akışı ve Madde Döngüsü": "Orta",
+      "Ekstrem Doğa Olayları": "Orta",
+      "Küresel İklim Değişimi": "Zor",
+      "Nüfus Politikaları": "Orta",
+      "Türkiye’de Nüfus ve Yerleşme": "Orta",
+      "Ekonomik Faaliyetler ve Doğal Kaynaklar": "Orta",
+      "Göç ve Şehirleşme": "Orta",
+      "Türkiye Ekonomisi": {
+        "zorlukDerecesi": "Zor",
+        "türler": {
+          "Türkiye’nin Ekonomi Politikaları": "Orta",
+          "Türkiye Ekonomisinin Sektörel Dağılımı": "Orta",
+          "Türkiye’de Tarım": "Kolay",
+          "Türkiye’de Hayvancılık": "Kolay",
+          "Türkiye’de Madenler ve Enerji Kaynakları": "Zor",
+          "Türkiye’de Sanayi": "Orta",
+          "Türkiye’de Ulaşım": "Orta",
+          "Türkiye’de Ticaret ve Turizm": "Orta"
+        }
+      },
+      "Geçmişten Geleceğe Şehir ve Ekonomi": "Orta",
+      "Türkiye’nin İşlevsel Bölgeleri ve Kalkınma Projeleri": "Zor",
+      "Hizmet Sektörünün Ekonomideki Yeri": "Kolay",
+      "Küresel Ticaret": "Zor",
+      "Bölgeler ve Ülkeler": "Zor",
+      "İlk Uygarlıklar": "Kolay",
+      "Kültür Bölgeleri ve Türk Kültürü": "Orta",
+      "Sanayileşme Süreci: Almanya": "Orta",
+      "Tarım ve Ekonomi İlişkisi Fransa – Somali": "Orta",
+      "Ülkeler Arası Etkileşim": "Zor",
+      "Jeopolitik Konum": "Orta",
+      "Çatışma Bölgeleri": "Zor",
+      "Küresel ve Bölgesel Örgütler": "Orta",
+      "Çevre ve Toplum": "Orta",
+      "Çevre Sorunları ve Türleri": "Zor",
+      "Madenler ve Enerji Kaynaklarının Çevreye Etkisi": "Orta",
+      "Doğal Kaynakların Sürdürülebilir Kullanımı": "Zor",
+      "Ekolojik Ayak İzi": "Orta",
+      "Doğal Çevrenin Sınırlılığı": "Orta",
+      "Çevre Politikaları": "Zor",
+      "Çevresel Örgütler": "Kolay",
+      "Çevre Anlaşmaları": "Orta",
+      "Doğal Afetler": "Orta"
+    }
+  }
+  

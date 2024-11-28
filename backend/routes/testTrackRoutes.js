@@ -1,11 +1,23 @@
 import express from 'express';
 import { protect } from '../middleware/authMiddleware.js';
-import { addTestTrack, getTestTracks, updateTestTrack } from '../controllers/testTrackController.js';
+import {
+  getTestTracks,
+  addTestTrack,
+  updateTestTrack,
+  deleteTestTrack,
+  getLinkedTestTracks
+} from '../controllers/testTrackController.js';
 
 const router = express.Router();
 
-router.post('/', protect, addTestTrack);
-router.get('/', protect, getTestTracks);
-router.put('/:id', protect, updateTestTrack);
+router.get('/linked', protect, getLinkedTestTracks);
+
+router.route('/')
+  .get(protect, getTestTracks)
+  .post(protect, addTestTrack);
+
+router.route('/:id')
+  .put(protect, updateTestTrack)
+  .delete(protect, deleteTestTrack);
 
 export default router; 

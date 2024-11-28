@@ -1,0 +1,52 @@
+{
+    "Lesson": "AYT Matematik",
+    "questionNumber": 40,
+    "Subjects": {
+      "Temel Kavramlar": "Kolay",
+      "Sayı Basamakları": "Kolay",
+      "Bölme ve Bölünebilme": "Orta",
+      "EBOB - EKOK": "Orta",
+      "Rasyonel Sayılar": "Kolay",
+      "Basit Eşitsizlikler": "Kolay",
+      "Mutlak Değer": "Orta",
+      "Üslü Sayılar": "Kolay",
+      "Köklü Sayılar": "Orta",
+      "Çarpanlara Ayırma": "Orta",
+      "Oran Orantı": "Kolay",
+      "Denklem Çözme": "Kolay",
+      "Problemler": {
+        "zorlukDerecesi": "Zor",
+        "türler": {
+          "Sayı Problemleri": "Orta",
+          "Kesir Problemleri": "Kolay",
+          "Yaş Problemleri": "Orta",
+          "Hareket Hız Problemleri": "Zor",
+          "İşçi Emek Problemleri": "Orta",
+          "Yüzde Problemleri": "Kolay",
+          "Kar Zarar Problemleri": "Orta",
+          "Karışım Problemleri": "Orta",
+          "Grafik Problemleri": "Zor",
+          "Rutin Olmayan Problemler": "Zor"
+        }
+      },
+      "Kümeler": "Kolay",
+      "Kartezyen Çarpım": "Orta",
+      "Mantık": "Orta",
+      "Fonksiyonlar": "Zor",
+      "Polinomlar": "Orta",
+      "2.Dereceden Denklemler": "Orta",
+      "Permütasyon ve Kombinasyon": "Orta",
+      "Binom ve Olasılık": "Orta",
+      "İstatistik": "Kolay",
+      "Karmaşık Sayılar": "Zor",
+      "2.Dereceden Eşitsizlikler": "Zor",
+      "Parabol": "Zor",
+      "Trigonometri": "Orta",
+      "Logaritma": "Orta",
+      "Diziler": "Orta",
+      "Limit": "Zor",
+      "Türev": "Zor",
+      "İntegral": "Zor"
+    }
+  }
+  

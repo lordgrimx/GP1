@@ -3,6 +3,10 @@ import generateToken from '../utils/generateToken.js';
 import path from 'path';
 import fs from 'fs';
 import defaultPP from '../defaultPP.json' assert { type: 'json' };
+import StudySession from '../models/studySession.js';
+import TestResult from '../models/testResult.js';
+import { startOfWeek, endOfWeek, eachDayOfInterval, format } from 'date-fns';
+import { tr } from 'date-fns/locale';
 
 // Kullanıcı kaydı
 export const registerUser = async (req, res) => {
@@ -37,13 +41,16 @@ export const registerUser = async (req, res) => {
 
 // Kullanıcı girişi
 export const loginUser = async (req, res) => {
-  const { username, password } = req.body;
+  const { identifier, password } = req.body;
 
   try {
-    const user = await User.findOne({ username });
+    const user = await User.findOne({
+      $or: [{ email: identifier }, { username: identifier }]
+    });
 
     if (user && (await user.matchPassword(password))) {
       res.json({
+        success: true,
         _id: user._id,
         username: user.username,
         email: user.email,
@@ -52,11 +59,17 @@ export const loginUser = async (req, res) => {
         token: generateToken(user._id),
       });
     } else {
-      res.status(401).json({ message: 'Invalid username or password' });
+      res.status(401).json({ 
+        success: false,
+        message: 'Geçersiz kullanıcı adı/email veya şifre' 
+      });
     }
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ message: 'Server error', error });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Sunucu hatası' 
+    });
   }
 };
 
@@ -157,5 +170,128 @@ export const getUserIntelligence = async (req, res) => {
   } catch (error) {
     console.error('Intelligence fetch error:', error);
     res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+export const getUserStats = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Çalışma oturumlarını getir
+    const studySessions = await StudySession.find({ userId });
+    
+    // Test sonuçlarını getir
+    const testResults = await TestResult.find({ userId });
+
+    // Benzersiz çalışılan konuları say
+    const uniqueTopics = await StudySession.distinct('topicId', { userId });
+    const completedTopics = uniqueTopics.length;
+
+    // Toplam çalışma süresini hesapla (saat cinsinden)
+    const totalStudyTime = studySessions.reduce((total, session) => total + session.duration, 0) / 60;
+
+    // Toplam soru sayısı ve ortalama skoru hesapla
+    const totalQuestions = testResults.reduce((total, result) => total + result.questionCount, 0);
+    const averageScore = testResults.length > 0
+      ? testResults.reduce((total, result) => total + result.score, 0) / testResults.length
+      : 0;
+
+    // Çalışma serisini hesapla
+    const studyStreak = calculateStudyStreak(studySessions);
+
+    // Son 7 günün ilerleme verilerini hesapla
+    const weeklyProgress = calculateWeeklyProgress(testResults);
+
+    res.json({
+      totalStudyTime: Math.round(totalStudyTime),
+      completedTopics,
+      totalQuestions,
+      averageScore: Math.round(averageScore),
+      studyStreak,
+      weeklyProgress
+    });
+  } catch (error) {
+    console.error('Stats fetch error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Yardımcı fonksiyonlar
+const calculateStudyStreak = (sessions) => {
+  if (!sessions.length) return 0;
+  // Streak hesaplama mantığı...
+  return 1; // Basit bir başlangıç değeri
+};
+
+const calculateWeeklyProgress = (results) => {
+  // Son 7 günün verilerini döndür
+  return Array(7).fill(0).map(() => Math.floor(Math.random() * 100)); // Örnek veri
+};
+
+export const getWeeklyProgress = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const now = new Date();
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 }); // Pazartesi başlangıç
+    const weekEnd = endOfWeek(now, { weekStartsOn: 1 }); // Pazar bitiş
+
+    // Haftalık çalışma oturumları
+    const weeklyStudySessions = await StudySession.find({
+      userId,
+      createdAt: {
+        $gte: weekStart,
+        $lte: weekEnd
+      }
+    }).lean();
+
+    // Haftalık test sonuçları
+    const weeklyTestResults = await TestResult.find({
+      userId,
+      createdAt: {
+        $gte: weekStart,
+        $lte: weekEnd
+      }
+    }).lean();
+
+    // Haftanın her günü için veri hesapla
+    const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
+    const dailyProgress = weekDays.map(day => {
+      const dayStr = format(day, 'yyyy-MM-dd');
+      
+      // O günün çalışma oturumları
+      const daySessions = weeklyStudySessions.filter(session => 
+        format(new Date(session.createdAt), 'yyyy-MM-dd') === dayStr
+      );
+      
+      // O günün test sonuçları
+      const dayResults = weeklyTestResults.filter(result => 
+        format(new Date(result.createdAt), 'yyyy-MM-dd') === dayStr
+      );
+
+      // Günlük toplam çalışma süresi (dakika)
+      const totalStudyTime = daySessions.reduce((sum, session) => sum + (session.duration || 0), 0);
+      
+      // Günlük ortalama test skoru
+      const avgTestScore = dayResults.length > 0
+        ? dayResults.reduce((sum, result) => sum + (result.score || 0), 0) / dayResults.length
+        : 0;
+
+      // Günlük ilerleme puanı (çalışma süresi ve test skorlarının ağırlıklı ortalaması)
+      const progressScore = (totalStudyTime / 60) * 0.7 + avgTestScore * 0.3;
+
+      return Math.round(progressScore);
+    });
+
+    res.json({
+      weeklyProgress: dailyProgress,
+      labels: weekDays.map(day => format(day, 'EEEE', { locale: tr })) // Türkçe gün isimleri
+    });
+
+  } catch (error) {
+    console.error('Weekly progress error:', error);
+    res.status(400).json({ 
+      message: 'Haftalık ilerleme verileri alınamadı', 
+      error: error.message 
+    });
   }
 };

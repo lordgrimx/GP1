@@ -1,16 +1,21 @@
 import express from 'express';
-import { registerUser, loginUser, getUserProfile, updateUserPassword, updateUserProfilePhoto, getUserIntelligence } from '../controllers/userController.js';
 import { protect } from '../middleware/authMiddleware.js';
-import multer from 'multer';
+import { 
+    registerUser, 
+    loginUser, 
+    getUserProfile,
+    updateUserProfile,
+    getWeeklyProgress,
+    getUserIntelligence
+} from '../controllers/userController.js';
 
 const router = express.Router();
-const upload = multer({ dest: 'uploads/' });
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.get('/profile', protect, getUserProfile);
-router.put('/password', protect, updateUserPassword);
-router.put('/profile/photo', protect, upload.single('profileImage'), updateUserProfilePhoto);
+router.put('/profile', protect, updateUserProfile);
+router.get('/weekly-progress', protect, getWeeklyProgress);
 router.get('/intelligence', protect, getUserIntelligence);
 
 export default router;

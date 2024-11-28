@@ -1,175 +1,313 @@
 import React, { useState, useEffect } from 'react';
-//import { Lock } from 'lucide-react';
-import { getUserProfile, updateUserPassword, updateUserProfile, updateUserProfilePicture } from '../api/api';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Camera, Lock, User, Mail, Check, X } from 'lucide-react';
+import { getUserProfile, updateUserProfile, updateUserPassword, updateUserProfilePicture } from '../api/api';
+import { useTheme } from '../context/ThemeContext';
+import toast from 'react-hot-toast';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const ProfilePage: React.FC = () => {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmNewPassword, setConfirmNewPassword] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [activeForm, setActiveForm] = useState<'password' | 'photo'>('password');
-  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const { theme } = useTheme();
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'profile' | 'security'>('profile');
+  const [profileData, setProfileData] = useState({
+    username: '',
+    email: '',
+    profileImage: '',
+  });
+  
+  const [passwordData, setPasswordData] = useState({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [tempProfileData, setTempProfileData] = useState(profileData);
+
+  // Animasyon varyantları
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.4, ease: "easeOut" }
+    },
+    exit: { 
+      opacity: 0,
+      y: -20,
+      transition: { duration: 0.3 }
+    }
+  };
+
+  const tabVariants = {
+    inactive: { color: theme === 'dark' ? '#9CA3AF' : '#6B7280' },
+    active: { 
+      color: theme === 'dark' ? '#FFFFFF' : '#000000',
+      transition: { duration: 0.2 }
+    }
+  };
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchProfile = async () => {
       try {
         const response = await getUserProfile();
-        setUsername(response.data.username);
-        setEmail(response.data.email);
-      } catch (err) {
-        console.error('Error fetching user data:', err);
-        setError('Failed to load user data');
+        setProfileData(response.data);
+        setTempProfileData(response.data);
+        setIsLoading(false);
+      } catch (error) {
+        toast.error('Profil bilgileri yüklenemedi');
+        setIsLoading(false);
       }
     };
-
-    fetchUserData();
+    fetchProfile();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (activeForm === 'password') {
-      if (newPassword && newPassword !== confirmNewPassword) {
-        setError('New passwords do not match');
-        return;
-      }
-
-      try {
-        await updateUserPassword({ oldPassword, newPassword });
-        setSuccess('Password updated successfully.');
-        setTimeout(() => setSuccess(''), 3000);
-      } catch (err) {
-        console.error('Error updating password:', err);
-        setError('Failed to update password');
-        setTimeout(() => setError(''), 3000);
-      }
-    } else if (activeForm === 'photo' && profileImage) {
-      const reader = new FileReader();
-      reader.readAsDataURL(profileImage);
-      reader.onloadend = async () => {
-        const base64data = reader.result as string;
-        try {
-          await updateUserProfile({ profileImage: base64data });
-          setSuccess('Profile photo updated successfully.');
-        } catch (err) {
-          setError('Failed to update profile photo');
-        }
-      };
+  const handleProfileUpdate = async () => {
+    try {
+      await updateUserProfile(tempProfileData);
+      setProfileData(tempProfileData);
+      setIsEditing(false);
+      toast.success('Profil güncellendi');
+    } catch (error) {
+      toast.error('Profil güncellenemedi');
     }
   };
 
-  const handleProfileImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files ? e.target.files[0] : null;
+  const handlePasswordUpdate = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('Şifreler eşleşmiyor');
+      return;
+    }
+    try {
+      await updateUserPassword(passwordData);
+      setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
+      toast.success('Şifre güncellendi');
+    } catch (error) {
+      toast.error('Şifre güncellenemedi');
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
-      const formData = new FormData();
-      formData.append('profileImage', file);
       try {
+        const formData = new FormData();
+        formData.append('profileImage', file);
         await updateUserProfilePicture(formData);
-        setSuccess('Profil fotoğrafı başarıyla güncellendi.');
-      } catch (err) {
-        setError('Profil fotoğrafı güncellenemedi.');
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setProfileData(prev => ({ ...prev, profileImage: reader.result as string }));
+        };
+        reader.readAsDataURL(file);
+        toast.success('Profil fotoğrafı güncellendi');
+      } catch (error) {
+        toast.error('Profil fotoğrafı güncellenemedi');
       }
     }
   };
+
+  if (isLoading) return <LoadingSpinner />;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Your Profile</h2>
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-        {success && <p className="text-green-500 text-center mb-4">{success}</p>}
-        <div className="flex justify-center mb-4">
-          <button
-            className={`px-4 py-2 ${activeForm === 'password' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-            onClick={() => setActiveForm('password')}
+    <div className={`min-h-screen px-4 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        variants={containerVariants}
+        className="max-w-4xl mx-auto"
+      >
+        {/* Profil Başlığı */}
+        <div className="text-center mb-8">
+          <motion.div
+            className="relative inline-block"
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.2 }}
           >
-            Update Password
-          </button>
-          <button
-            className={`px-4 py-2 ${activeForm === 'photo' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-            onClick={() => setActiveForm('photo')}
-          >
-            Update Photo
-          </button>
-        </div>
-        <form onSubmit={handleSubmit}>
-          {activeForm === 'password' ? (
-            <>
-              <div className="mb-4">
-                <label htmlFor="username" className="block text-gray-700 text-sm font-bold mb-2">Username</label>
-                <input
-                  type="text"
-                  id="username"
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  value={username}
-                  disabled
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">Email</label>
-                <input
-                  type="email"
-                  id="email"
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  value={email}
-                  disabled
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="oldPassword" className="block text-gray-700 text-sm font-bold mb-2">Old Password</label>
-                <input
-                  type="password"
-                  id="oldPassword"
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  value={oldPassword}
-                  onChange={(e) => setOldPassword(e.target.value)}
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="newPassword" className="block text-gray-700 text-sm font-bold mb-2">New Password</label>
-                <input
-                  type="password"
-                  id="newPassword"
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                />
-              </div>
-              <div className="mb-6">
-                <label htmlFor="confirmNewPassword" className="block text-gray-700 text-sm font-bold mb-2">Confirm New Password</label>
-                <input
-                  type="password"
-                  id="confirmNewPassword"
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  value={confirmNewPassword}
-                  onChange={(e) => setConfirmNewPassword(e.target.value)}
-                />
-              </div>
-            </>
-          ) : (
-            <div className="mb-6">
-              <label htmlFor="profileImage" className="block text-gray-700 text-sm font-bold mb-2">Profile Image</label>
+            <img
+              src={profileData.profileImage || 'default-avatar.png'}
+              alt="Profile"
+              className="w-32 h-32 rounded-full object-cover border-4 border-blue-500 shadow-lg"
+            />
+            <label className="absolute bottom-0 right-0 p-2 bg-blue-500 rounded-full cursor-pointer hover:bg-blue-600 transition-colors">
+              <Camera className="w-5 h-5 text-white" />
               <input
                 type="file"
-                id="profileImage"
+                className="hidden"
                 accept="image/*"
-                onChange={handleProfileImageChange}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                onChange={handleImageUpload}
               />
-            </div>
-          )}
-          <div className="flex items-center justify-between">
-            <button
-              type="submit"
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            </label>
+          </motion.div>
+          <h1 className="mt-4 text-2xl font-bold">{profileData.username}</h1>
+          <p className="text-gray-500">{profileData.email}</p>
+        </div>
+
+        {/* Tab Menüsü */}
+        <div className="flex justify-center mb-8 border-b border-gray-200 dark:border-gray-700">
+          <motion.button
+            variants={tabVariants}
+            animate={activeTab === 'profile' ? 'active' : 'inactive'}
+            onClick={() => setActiveTab('profile')}
+            className={`px-6 py-3 ${activeTab === 'profile' ? 'border-b-2 border-blue-500' : ''}`}
+          >
+            <User className="inline-block mr-2 w-5 h-5" />
+            Profil
+          </motion.button>
+          <motion.button
+            variants={tabVariants}
+            animate={activeTab === 'security' ? 'active' : 'inactive'}
+            onClick={() => setActiveTab('security')}
+            className={`px-6 py-3 ${activeTab === 'security' ? 'border-b-2 border-blue-500' : ''}`}
+          >
+            <Lock className="inline-block mr-2 w-5 h-5" />
+            Güvenlik
+          </motion.button>
+        </div>
+
+        {/* Tab İçerikleri */}
+        <AnimatePresence mode="wait">
+          {activeTab === 'profile' ? (
+            <motion.div
+              key="profile"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.3 }}
+              className={`p-6 rounded-lg shadow-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}
             >
-              {activeForm === 'password' ? 'Update Password' : 'Update Photo'}
-            </button>
-          </div>
-        </form>
-      </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Kullanıcı Adı</label>
+                  <input
+                    type="text"
+                    value={isEditing ? tempProfileData.username : profileData.username}
+                    onChange={(e) => setTempProfileData({ ...tempProfileData, username: e.target.value })}
+                    disabled={!isEditing}
+                    className={`w-full p-2 rounded border ${
+                      theme === 'dark' 
+                        ? 'bg-gray-700 border-gray-600' 
+                        : 'bg-white border-gray-300'
+                    } ${!isEditing && 'opacity-75'}`}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">E-posta</label>
+                  <input
+                    type="email"
+                    value={isEditing ? tempProfileData.email : profileData.email}
+                    onChange={(e) => setTempProfileData({ ...tempProfileData, email: e.target.value })}
+                    disabled={!isEditing}
+                    className={`w-full p-2 rounded border ${
+                      theme === 'dark' 
+                        ? 'bg-gray-700 border-gray-600' 
+                        : 'bg-white border-gray-300'
+                    } ${!isEditing && 'opacity-75'}`}
+                  />
+                </div>
+                <div className="flex justify-end space-x-3">
+                  {isEditing ? (
+                    <>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                          setIsEditing(false);
+                          setTempProfileData(profileData);
+                        }}
+                        className="px-4 py-2 rounded bg-gray-500 text-white hover:bg-gray-600 transition-colors"
+                      >
+                        <X className="w-5 h-5 inline-block mr-1" />
+                        İptal
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleProfileUpdate}
+                        className="px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600 transition-colors"
+                      >
+                        <Check className="w-5 h-5 inline-block mr-1" />
+                        Kaydet
+                      </motion.button>
+                    </>
+                  ) : (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setIsEditing(true)}
+                      className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition-colors"
+                    >
+                      Düzenle
+                    </motion.button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="security"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.3 }}
+              className={`p-6 rounded-lg shadow-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}
+            >
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Mevcut Şifre</label>
+                  <input
+                    type="password"
+                    value={passwordData.oldPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
+                    className={`w-full p-2 rounded border ${
+                      theme === 'dark' 
+                        ? 'bg-gray-700 border-gray-600' 
+                        : 'bg-white border-gray-300'
+                    }`}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Yeni Şifre</label>
+                  <input
+                    type="password"
+                    value={passwordData.newPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                    className={`w-full p-2 rounded border ${
+                      theme === 'dark' 
+                        ? 'bg-gray-700 border-gray-600' 
+                        : 'bg-white border-gray-300'
+                    }`}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Yeni Şifre (Tekrar)</label>
+                  <input
+                    type="password"
+                    value={passwordData.confirmPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                    className={`w-full p-2 rounded border ${
+                      theme === 'dark' 
+                        ? 'bg-gray-700 border-gray-600' 
+                        : 'bg-white border-gray-300'
+                    }`}
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handlePasswordUpdate}
+                    className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition-colors"
+                  >
+                    Şifreyi Güncelle
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 };

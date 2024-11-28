@@ -1,0 +1,28 @@
+{
+    "Lesson": "AYT Biyoloji",
+    "questionNumber": 40,
+    "Subjects": {
+      "Sinir Sistemi": "Orta",
+      "Endokrin Sistem ve Hormonlar": "Orta",
+      "Duyu Organları": "Kolay",
+      "Destek ve Hareket Sistemi": "Kolay",
+      "Sindirim Sistemi": "Kolay",
+      "Dolaşım ve Bağışıklık Sistemi": "Orta",
+      "Solunum Sistemi": "Orta",
+      "Üriner Sistem (Boşaltım Sistemi)": "Kolay",
+      "Üreme Sistemi ve Embriyonik Gelişim": "Orta",
+      "Komünite Ekolojisi": "Orta",
+      "Popülasyon Ekolojisi": "Orta",
+      "Genden Proteine": "Zor",
+      "Nükleik Asitler": "Zor",
+      "Genetik Şifre ve Protein Sentezi": "Zor",
+      "Canlılarda Enerji Dönüşümleri": "Zor",
+      "Canlılık ve Enerji": "Orta",
+      "Fotosentez": "Zor",
+      "Kemosentez": "Zor",
+      "Hücresel Solunum": "Zor",
+      "Bitki Biyolojisi": "Zor",
+      "Canlılar ve Çevre": "Orta"
+    }
+  }
+  

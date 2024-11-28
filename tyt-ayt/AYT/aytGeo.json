@@ -1,0 +1,45 @@
+{
+    "Lesson": "AYT Geometri",
+    "questionNumber": 40,
+    "Subjects": {
+      "Temel Kavramlar": "Kolay",
+      "Doğruda Açılar": "Kolay",
+      "Üçgende Açılar": "Kolay",
+      "Özel Üçgenler": "Kolay",
+      "Dik Üçgen": "Orta",
+      "İkizkenar Üçgen": "Orta",
+      "Eşkenar Üçgen": "Kolay",
+      "Açıortay": "Orta",
+      "Kenarortay": "Orta",
+      "Üçgende Alan": "Zor",
+      "Üçgende Benzerlik": "Zor",
+      "Açı Kenar Bağıntıları": "Orta",
+      "Çokgenler": "Kolay",
+      "Özel Dörtgenler": "Orta",
+      "Dörtgenler": "Orta",
+      "Deltoid": "Kolay",
+      "Paralelkenar": "Kolay",
+      "Eşkenar Dörtgen": "Kolay",
+      "Dikdörtgen": "Kolay",
+      "Kare": "Kolay",
+      "İkizkenar Yamuk": "Orta",
+      "Çember ve Daire": "Orta",
+      "Analitik Geometri": "Zor",
+      "Noktanın Analitiği": "Kolay",
+      "Doğrunun Analitiği": "Orta",
+      "Dönüşüm Geometrisi": "Zor",
+      "Katı Cisimler (Uzay Geometri)": {
+        "zorlukDerecesi": "Zor",
+        "türler": {
+          "Dikdörtgenler Prizması": "Kolay",
+          "Küp": "Kolay",
+          "Silindir": "Orta",
+          "Piramit": "Zor",
+          "Koni": "Zor",
+          "Küre": "Zor"
+        }
+      },
+      "Çemberin Analitiği": "Zor"
+    }
+  }
+  

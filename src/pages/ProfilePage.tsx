@@ -1,31 +1,91 @@
+/**
+ * @file    ProfilePage.tsx
+ * @desc    Kullanıcı profil sayfası
+ * @details Kullanıcının profil bilgilerini görüntüleyebildiği, düzenleyebildiği ve güvenlik ayarlarını yönetebildiği sayfa
+ */
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Lock, User, Mail, Check, X } from 'lucide-react';
+import { Camera, Lock, User, Check, X } from 'lucide-react';
 import { getUserProfile, updateUserProfile, updateUserPassword, updateUserProfilePicture } from '../api/api';
 import { useTheme } from '../context/ThemeContext';
-import toast from 'react-hot-toast';
+import { showToast } from '../utils/toast';
 import LoadingSpinner from '../components/LoadingSpinner';
 
+/**
+ * @component ProfilePage
+ * @desc     Kullanıcı profil yönetimi sayfası
+ * @returns  {JSX.Element} Profil sayfası yapısı
+ * 
+ * @states
+ * - isLoading: Sayfa yükleme durumu
+ * - activeTab: Aktif sekme (profil/güvenlik)
+ * - profileData: Kullanıcı profil bilgileri
+ * - passwordData: Şifre değişikliği verileri
+ * - isEditing: Profil düzenleme modu durumu
+ * - tempProfileData: Geçici profil düzenleme verileri
+ * 
+ * @animations
+ * - containerVariants: Ana içerik için animasyon ayarları
+ * - tabVariants: Sekme geçişleri için animasyon ayarları
+ * 
+ * @sections
+ * - Profile Header: Profil fotoğrafı ve kullanıcı bilgileri
+ * - Tab Menu: Profil ve güvenlik sekmeleri
+ * - Profile Form: Profil bilgileri düzenleme formu
+ * - Security Form: Şifre değiştirme formu
+ */
 const ProfilePage: React.FC = () => {
   const { theme } = useTheme();
+
+  /**
+   * @state isLoading
+   * @desc  Sayfa yükleme durumunu kontrol eden state
+   */
   const [isLoading, setIsLoading] = useState(true);
+
+  /**
+   * @state activeTab
+   * @desc  Aktif sekmeyi tutan state
+   */
   const [activeTab, setActiveTab] = useState<'profile' | 'security'>('profile');
+
+  /**
+   * @state profileData
+   * @desc  Kullanıcı profil bilgilerini tutan state
+   */
   const [profileData, setProfileData] = useState({
     username: '',
     email: '',
     profileImage: '',
   });
-  
+
+  /**
+   * @state passwordData
+   * @desc  Şifre değişikliği verilerini tutan state
+   */
   const [passwordData, setPasswordData] = useState({
     oldPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
 
+  /**
+   * @state isEditing
+   * @desc  Profil düzenleme modunu kontrol eden state
+   */
   const [isEditing, setIsEditing] = useState(false);
+
+  /**
+   * @state tempProfileData
+   * @desc  Geçici profil düzenleme verilerini tutan state
+   */
   const [tempProfileData, setTempProfileData] = useState(profileData);
 
-  // Animasyon varyantları
+  /**
+   * @constant containerVariants
+   * @desc    Ana içerik için animasyon konfigürasyonu
+   */
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { 
@@ -40,6 +100,10 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  /**
+   * @constant tabVariants
+   * @desc    Sekme geçişleri için animasyon konfigürasyonu
+   */
   const tabVariants = {
     inactive: { color: theme === 'dark' ? '#9CA3AF' : '#6B7280' },
     active: { 
@@ -48,6 +112,10 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  /**
+   * @effect
+   * @desc   Sayfa yüklendiğinde profil verilerini çeken effect hook
+   */
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -56,38 +124,53 @@ const ProfilePage: React.FC = () => {
         setTempProfileData(response.data);
         setIsLoading(false);
       } catch (error) {
-        toast.error('Profil bilgileri yüklenemedi');
+        showToast.error('Profil bilgileri yüklenemedi');
         setIsLoading(false);
       }
     };
     fetchProfile();
   }, []);
 
+  /**
+   * @function handleProfileUpdate
+   * @desc     Profil bilgilerini güncelleyen fonksiyon
+   * @async
+   */
   const handleProfileUpdate = async () => {
     try {
       await updateUserProfile(tempProfileData);
       setProfileData(tempProfileData);
       setIsEditing(false);
-      toast.success('Profil güncellendi');
+      showToast.success('Profil güncellendi');
     } catch (error) {
-      toast.error('Profil güncellenemedi');
+      showToast.error('Profil güncellenemedi');
     }
   };
 
+  /**
+   * @function handlePasswordUpdate
+   * @desc     Kullanıcı şifresini güncelleyen fonksiyon
+   * @async
+   */
   const handlePasswordUpdate = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('Şifreler eşleşmiyor');
+      showToast.error('Şifreler eşleşmiyor');
       return;
     }
     try {
       await updateUserPassword(passwordData);
       setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
-      toast.success('Şifre güncellendi');
+      showToast.success('Şifre güncellendi');
     } catch (error) {
-      toast.error('Şifre güncellenemedi');
+      showToast.error('Şifre güncellenemedi');
     }
   };
 
+  /**
+   * @function handleImageUpload
+   * @desc     Profil fotoğrafını güncelleyen fonksiyon
+   * @async
+   */
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -100,9 +183,9 @@ const ProfilePage: React.FC = () => {
           setProfileData(prev => ({ ...prev, profileImage: reader.result as string }));
         };
         reader.readAsDataURL(file);
-        toast.success('Profil fotoğrafı güncellendi');
+        showToast.success('Profil fotoğrafı güncellendi');
       } catch (error) {
-        toast.error('Profil fotoğrafı güncellenemedi');
+        showToast.error('Profil fotoğrafı güncellenemedi');
       }
     }
   };

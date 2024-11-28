@@ -1,3 +1,6 @@
+/**
+ * @desc    Gerekli modüllerin içe aktarılması
+ */
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -11,68 +14,44 @@ import studySessionRoutes from './routes/studySessionRoutes.js';
 import testResultRoutes from './routes/testResultRoutes.js';
 import questionRoutes from './routes/questionRoutes.js';
 
+/**
+ * @desc    Çevresel değişkenleri yükle
+ */
 dotenv.config();
+
+/**
+ * @desc    Express uygulamasını başlat ve temel middleware'leri yapılandır
+ */
 const app = express();
 app.use(cors());
 
-// Body parser limitini artırıyoruz
+/**
+ * @desc    Request body parser ayarları
+ * @note    Büyük dosyalar için limit 10mb olarak ayarlandı
+ */
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-// Gemini API'yi başlat
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-// Gemini endpoint'i
-app.post('/api/gemini', async (req, res) => {
-  try {
-    const { image, prompt } = req.body;
-    
-    // Base64'ü binary'e çevir
-    const imageBuffer = Buffer.from(image.split(',')[1], 'base64');
-
-    // Gemini modeli için görüntüyü hazırla
-    const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
-    
-    const generationConfig = {
-      temperature: 0.4,
-      topK: 32,
-      topP: 1,
-      maxOutputTokens: 4096,
-    };
-
-    // Görüntüyü ve promptu birleştir
-    const promptText = `${prompt}
-    Lütfen bu sorunun çözümünü aşağıdaki formatta ver:
-    1. Kullanılacak formüller (varsa)
-    2. Çözüm adımları
-    3. Sonuç
-    
-    Her adımı detaylı açıkla ve matematiksel işlemleri göster.`;
-
-    const imagePart = {
-      inlineData: {
-        data: imageBuffer.toString('base64'),
-        mimeType: "image/jpeg"
-      }
-    };
-
-    // Gemini'ye gönder
-    const result = await model.generateContent([promptText, imagePart], generationConfig);
-    const response = await result.response;
-    const text = response.text();
-
-    res.json({ answer: text });
-  } catch (error) {
-    console.error('Gemini API Hatası:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// MongoDB bağlantısı ve diğer route'lar
+/**
+ * @desc    MongoDB bağlantısı
+ * @note    Bağlantı başarılı/başarısız durumları console'a loglanır
+ */
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch((error) => console.error('MongoDB connection error:', error));
 
+/**
+ * @desc    API route'larının tanımlanması
+ * @note    Tüm route'lar /api prefix'i ile başlar
+ * @routes
+ *   /api/users - Kullanıcı işlemleri
+ *   /api/subjects - Ders ve konu işlemleri
+ *   /api/quizzes - Quiz işlemleri
+ *   /api/testtrack - Deneme takip işlemleri
+ *   /api/study-sessions - Çalışma oturumu işlemleri
+ *   /api/test-results - Test sonuçları işlemleri
+ *   /api/questions - Soru işlemleri
+ */
 app.use('/api/users', userRoutes);
 app.use('/api/subjects', subjectRoutes);
 app.use('/api/quizzes', quizRoutes);
@@ -81,6 +60,10 @@ app.use('/api/study-sessions', studySessionRoutes);
 app.use('/api/test-results', testResultRoutes);
 app.use('/api/questions', questionRoutes);
 
+/**
+ * @desc    Sunucuyu başlat
+ * @note    Port numarası env'den alınır, yoksa 5000 kullanılır
+ */
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

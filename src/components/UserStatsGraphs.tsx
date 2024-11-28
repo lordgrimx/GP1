@@ -1,3 +1,8 @@
+/**
+ * @file    UserStatsGraphs.tsx
+ * @desc    Kullanıcı istatistiklerini görselleştiren grafik bileşeni
+ * @details Kullanıcının zeka türü dağılımı, test sonuçları gelişimi ve net sayısı gelişimi gibi istatistikleri görselleştirir
+ */
 import React, { useEffect, useState } from 'react';
 import { Line, Pie } from 'react-chartjs-2';
 import {
@@ -25,12 +30,27 @@ ChartJS.register(
   ArcElement
 );
 
+/**
+ * Konu bazlı istatistik verilerinin yapısı
+ * @interface SubjectStats
+ * @property {number} correct - Doğru cevap sayısı
+ * @property {number} incorrect - Yanlış cevap sayısı
+ * @property {number} empty - Boş bırakılan soru sayısı
+ */
 interface SubjectStats {
   correct: number;
   incorrect: number;
   empty: number;
 }
 
+/**
+ * Test takip verilerinin yapısı
+ * @interface TestTrackData
+ * @property {string} examName - Sınav adı
+ * @property {string} examType - Sınav türü
+ * @property {Object.<string, SubjectStats>} subjects - Konu bazlı istatistikler
+ * @property {string} createdAt - Sınav tarihi
+ */
 interface TestTrackData {
   examName: string;
   examType: string;
@@ -40,10 +60,20 @@ interface TestTrackData {
   createdAt: string;
 }
 
+/**
+ * Zeka türü verilerinin yapısı
+ * @interface IntelligenceData
+ * @property {number} [key: string] - Zeka türü ve değeri
+ */
 interface IntelligenceData {
   [key: string]: number;
 }
 
+/**
+ * Kullanıcı istatistiklerini görselleştiren grafik bileşeni
+ * @component
+ * @returns {JSX.Element} Grafik paneli
+ */
 const UserStatsGraphs = () => {
   const [intelligenceData, setIntelligenceData] = useState<IntelligenceData | null>(null);
   const [testTrackData, setTestTrackData] = useState<TestTrackData[]>([]);
@@ -52,6 +82,9 @@ const UserStatsGraphs = () => {
   const textColor = theme === 'dark' ? '#fff' : '#000';
   const gridColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
 
+  /**
+   * Verileri API'den çeken effect hook
+   */
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -70,6 +103,11 @@ const UserStatsGraphs = () => {
     fetchData();
   }, []);
 
+  /**
+   * Zeka türü dağılımı için grafik verileri
+   * @constant
+   * @type {Object}
+   */
   const intelligenceChartData = {
     labels: intelligenceData ? Object.keys(intelligenceData) : [],
     datasets: [
@@ -90,6 +128,11 @@ const UserStatsGraphs = () => {
     ],
   };
 
+  /**
+   * Test sonuçları gelişimi için grafik verileri
+   * @constant
+   * @type {Object}
+   */
   const testTrackChartData = {
     labels: testTrackData.map(track => track.examName),
     datasets: [
@@ -120,6 +163,11 @@ const UserStatsGraphs = () => {
     ],
   };
 
+  /**
+   * Net sayısı gelişimi için grafik verileri
+   * @constant
+   * @type {Object}
+   */
   const netScoreChartData = {
     labels: testTrackData.map(track => track.examName),
     datasets: [{
@@ -136,6 +184,11 @@ const UserStatsGraphs = () => {
     }]
   };
 
+  /**
+   * Grafik görünüm ayarları
+   * @constant
+   * @type {Object}
+   */
   const options = {
     responsive: true,
     plugins: {

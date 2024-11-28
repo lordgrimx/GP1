@@ -1,6 +1,14 @@
 import Quiz from '../models/quizModel.js';
 import QuizAttempt from '../models/quizAttemptModel.js';
 
+/**
+ * @desc    Yeni quiz oluşturur
+ * @route   POST /api/quizzes
+ * @access  Private
+ * @param   {string} title - Quiz başlığı
+ * @param   {array} questions - Quiz soruları listesi
+ * @returns {object} Oluşturulan quiz bilgileri
+ */
 export const createQuiz = async (req, res) => {
   try {
     const { title, questions } = req.body;
@@ -11,6 +19,12 @@ export const createQuiz = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Tüm quizleri getirir
+ * @route   GET /api/quizzes
+ * @access  Public
+ * @returns {array} Quizlerin listesi
+ */
 export const getQuizzes = async (req, res) => {
   try {
     const quizzes = await Quiz.find({});
@@ -20,6 +34,13 @@ export const getQuizzes = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Belirli bir quizi ID'ye göre getirir
+ * @route   GET /api/quizzes/:id
+ * @access  Public
+ * @param   {string} id - Quiz ID'si
+ * @returns {object} Quiz detayları
+ */
 export const getQuizById = async (req, res) => {
   try {
     const quiz = await Quiz.findById(req.params.id);
@@ -33,6 +54,16 @@ export const getQuizById = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Quiz denemesi sonucunu kaydeder
+ * @route   POST /api/quizzes/:id/submit
+ * @access  Private
+ * @param   {string} id - Quiz ID'si
+ * @param   {array} answers - Kullanıcının cevapları
+ * @returns {object} Quiz denemesi sonuçları
+ * @details Kullanıcının cevaplarını kontrol eder, 
+ *          skor hesaplar ve sonucu kaydeder
+ */
 export const submitQuizAttempt = async (req, res) => {
   try {
     const { answers } = req.body;

@@ -1,37 +1,70 @@
-import React from 'react';
+/**
+ * @file    FeatureCard.tsx
+ * @desc    Özellik kartı bileşeni
+ * @details Uygulama özelliklerini görsel ve açıklama ile gösteren kart bileşeni
+ */
+
+import React, { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 
+/**
+ * @interface FeatureCardProps
+ * @desc     Özellik kartı bileşeni için prop tipleri
+ */
 interface FeatureCardProps {
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
   description: string;
+  onClick?: () => void;
 }
 
-const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description }) => {
+/**
+ * @component FeatureCard
+ * @desc     Özellik kartı bileşeni
+ * @param    {FeatureCardProps} props - Bileşen props'ları
+ * @returns  {JSX.Element} Animasyonlu ve duyarlı özellik kartı
+ * 
+ * @styles
+ * - motion.div: Hover animasyonu için Framer Motion kullanımı
+ * - p-6: İç boşluk (padding)
+ * - rounded-xl: Yuvarlak köşeler
+ * - shadow-lg: Gölge efekti
+ * - transition-all: Tüm stil değişimleri için geçiş efekti
+ * - duration-300: Geçiş süresi (300ms)
+ * 
+ * @theming
+ * - dark:bg-gray-800: Koyu tema arka plan rengi
+ * - dark:hover:bg-gray-700: Koyu tema hover arka plan rengi
+ * - bg-white: Açık tema arka plan rengi
+ * - hover:bg-gray-50: Açık tema hover arka plan rengi
+ */
+const FeatureCard = ({ icon, title, description, onClick }: FeatureCardProps) => {
   const { theme } = useTheme();
 
   return (
-    <motion.div
-      whileHover={{ y: -5 }}
-      className={`p-6 rounded-xl shadow-lg ${
-        theme === 'dark' 
+    <div
+      onClick={onClick}
+      className={`
+        cursor-pointer p-6 rounded-lg shadow-lg
+        transition-all duration-300 transform hover:scale-105
+        ${theme === 'dark' 
           ? 'bg-gray-800 hover:bg-gray-700' 
           : 'bg-white hover:bg-gray-50'
-      } transition-all duration-300`}
+        }
+      `}
     >
-      <div className="flex flex-col items-center text-center">
-        <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30">
-          {icon}
-        </div>
-        <h3 className={`mt-4 text-lg font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-          {title}
-        </h3>
-        <p className={`mt-2 text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
-          {description}
-        </p>
+      <div className="flex items-center gap-3">
+        {icon}
+        <h3 className="text-xl font-semibold">{title}</h3>
       </div>
-    </motion.div>
+      <p className={`
+        mt-2 
+        ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}
+      `}>
+        {description}
+      </p>
+    </div>
   );
 };
 

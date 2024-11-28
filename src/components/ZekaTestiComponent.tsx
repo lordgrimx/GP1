@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
+import showToast from '../utils/toast';
 interface ZekaTestiComponentProps {
   username: string;
   email: string;
@@ -9,7 +10,13 @@ interface ZekaTestiComponentProps {
   onSubmit: (sonuc: any) => void;
 }
 
-const ZekaTestiComponent: React.FC<ZekaTestiComponentProps> = ({ username, email, password, profileImage, onSubmit }) => {
+const ZekaTestiComponent: React.FC<ZekaTestiComponentProps> = ({
+  username,
+  email,
+  password,
+  profileImage,
+  onSubmit
+}) => {
     const adimlar = [
         [
           "Yazılar, görsellerden daha fazla dikkatimi çeker.",
@@ -113,32 +120,8 @@ const ZekaTestiComponent: React.FC<ZekaTestiComponentProps> = ({ username, email
   const [cevaplar, setCevaplar] = useState<(number | undefined)[]>(Array(adimlar[adim].length).fill(0));
   const [puanlar, setPuanlar] = useState<number[]>(Array(adimlar.length).fill(0));
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  const containerClass = `max-w-3xl mx-auto p-6 rounded-lg ${
-    theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'
-  }`;
-
-  const tableClass = `w-full mb-6 border-collapse ${
-    theme === 'dark' ? 'bg-gray-700' : 'bg-white'
-  }`;
-
-  const headerClass = `text-center py-3 ${
-    theme === 'dark' ? 'text-blue-400' : 'text-purple-700'
-  }`;
-
-  const rowClass = `border-b ${
-    theme === 'dark' ? 'border-gray-600 hover:bg-gray-600' : 'border-gray-200 hover:bg-gray-50'
-  }`;
-
-  const buttonClass = (disabled: boolean) => `
-    px-4 py-2 font-semibold rounded transition-colors
-    ${disabled 
-      ? 'bg-gray-300 text-gray-600 cursor-not-allowed' 
-      : theme === 'dark'
-        ? 'bg-blue-600 text-white hover:bg-blue-700'
-        : 'bg-purple-700 text-white hover:bg-purple-800'
-    }
-  `;
 
   const handleCevap = (index: number, deger: number) => {
     const yeniCevaplar = [...cevaplar];
@@ -169,88 +152,166 @@ const ZekaTestiComponent: React.FC<ZekaTestiComponentProps> = ({ username, email
     return adimCevaplar.reduce((a, b) => a + (b || 0), 0);
   };
 
-  const handleSubmit = () => {
-    const sonuc = {
-      "Sözel - Dilsel Zeka": puanlar[0] || 0,
-      "Matematiksel - Mantıksal Zeka": puanlar[1] || 0,
-      "Görsel - Uzamsal Zeka": puanlar[2] || 0,
-      "Müziksel Ritmik Zeka": puanlar[3] || 0,
-      "Doğasal Zeka": puanlar[4] || 0,
-      "Sosyal Zeka": puanlar[5] || 0,
-      "Bedensel - Kinestetik Zeka": puanlar[6] || 0,
-      "İçsel Zeka": puanlar[7] || 0
-    };
-    onSubmit(sonuc);
-    navigate('/register');
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      const sonuc = {
+        username,
+        email,
+        password,
+        profileImage,
+        typeofintelligence: {
+          "Sözel - Dilsel Zeka": Number(puanlar[0]) || 0,
+          "Matematiksel - Mantıksal Zeka": Number(puanlar[1]) || 0,
+          "Görsel - Uzamsal Zeka": Number(puanlar[2]) || 0,
+          "Müziksel Ritmik Zeka": Number(puanlar[3]) || 0,
+          "Doğasal Zeka": Number(puanlar[4]) || 0,
+          "Sosyal Zeka": Number(puanlar[5]) || 0,
+          "Bedensel - Kinestetik Zeka": Number(puanlar[6]) || 0,
+          "İçsel Zeka": Number(puanlar[7]) || 0
+        }
+      };
+
+      await onSubmit(sonuc);
+      showToast.success('Kayıt başarılı! Giriş yapabilirsiniz.');
+      navigate('/login');
+      
+    } catch (error: any) {
+      console.error('Test sonucu gönderme hatası:', error);
+      showToast.error(
+        error.response?.data?.message || 
+        'Sonuçlar kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const allQuestionsAnswered = cevaplar.every((cevap) => cevap !== undefined);
 
   return (
-    <div className={containerClass}>
-      <h1 className={`text-2xl font-bold text-center mb-6 ${theme === 'dark' ? 'text-blue-400' : 'text-purple-700'}`}>
-        {adim + 1}. Adım
-      </h1>
-      <div className="h-2 bg-gray-300 rounded-full mb-6">
-        <div
-          className={`h-2 rounded-full ${theme === 'dark' ? 'bg-blue-500' : 'bg-orange-500'}`}
-          style={{ width: `${((adim + 1) / adimlar.length) * 100}%` }}
-        ></div>
+    <div className={`w-full max-w-7xl mx-auto p-8 ${
+      theme === 'dark' ? 'text-gray-100' : 'text-gray-800'
+    }`}>
+      {/* Progress Bar */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-4">{adim + 1}. ADIM</h2>
+        <div className="flex gap-1 w-full">
+          {Array.from({ length: adimlar.length }).map((_, idx) => (
+            <div
+              key={idx}
+              className={`
+                h-2 flex-1 rounded-full transition-all duration-300
+                ${idx === adim 
+                  ? 'bg-orange-500' 
+                  : idx < adim 
+                    ? 'bg-orange-500' 
+                    : theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                }
+              `}
+            />
+          ))}
+        </div>
       </div>
-      <table className={tableClass}>
+
+      {/* Questions Table */}
+      <table className={`w-full border-collapse ${
+        theme === 'dark' ? 'text-gray-100' : 'text-gray-800'
+      }`}>
         <thead>
-          <tr>
-            <th className={headerClass}>İfadeler</th>
-            <th className={headerClass}>Kesinlikle katılıyorum</th>
-            <th className={headerClass}>Biraz katılıyorum</th>
-            <th className={headerClass}>Emin değilim</th>
-            <th className={headerClass}>Pek katılmıyorum</th>
-            <th className={headerClass}>Kesinlikle katılmıyorum</th>
+          <tr className={`border-b ${
+            theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
+          }`}>
+            <th className={`text-left py-4 w-1/3 font-semibold ${
+              theme === 'dark' ? 'text-blue-400' : 'text-purple-800'
+            }`}>İfadeler</th>
+            {['Kesinlikle katılıyorum', 'Biraz katılıyorum', 'Emin değilim', 
+              'Pek katılmıyorum', 'Kesinlikle katılmıyorum'].map(baslik => (
+              <th key={baslik} className={`text-center py-4 font-semibold ${
+                theme === 'dark' ? 'text-blue-400' : 'text-purple-800'
+              }`}>
+                {baslik}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
           {adimlar[adim].map((soru, index) => (
-            <tr key={index} className={rowClass}>
-              <td className={`text-left px-4 py-3 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
-                {soru}
-              </td>
+            <tr key={index} className={`border-b ${
+              theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
+            }`}>
+              <td className={`py-4 ${
+                theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+              }`}>{soru}</td>
               {[10, 7.5, 5, 2.5, 0].map((deger) => (
-                <td key={deger} className="text-center">
-                  <input
-                    type="radio"
-                    name={`soru-${index}`}
-                    value={deger}
-                    onChange={() => handleCevap(index, deger)}
-                    checked={cevaplar[index] === deger}
-                    className={`scale-125 ${theme === 'dark' ? 'accent-blue-500' : 'accent-purple-600'}`}
-                  />
+                <td key={deger} className="text-center py-4">
+                  <label className="inline-block cursor-pointer">
+                    <input
+                      type="radio"
+                      name={`soru-${index}`}
+                      value={deger}
+                      checked={cevaplar[index] === deger}
+                      onChange={() => handleCevap(index, deger)}
+                      className={`w-4 h-4 border-2 rounded-full cursor-pointer
+                        ${theme === 'dark'
+                          ? 'border-gray-600 checked:border-blue-500 checked:bg-blue-500'
+                          : 'border-gray-300 checked:border-purple-500 checked:bg-purple-500'
+                        }
+                        focus:ring-2 ${
+                          theme === 'dark'
+                            ? 'focus:ring-blue-400/20'
+                            : 'focus:ring-purple-200'
+                        }
+                      `}
+                    />
+                  </label>
                 </td>
               ))}
             </tr>
           ))}
         </tbody>
       </table>
-      <div className="flex justify-between">
-        <button
-          onClick={geri}
-          disabled={adim === 0}
-          className={buttonClass(adim === 0)}
-        >
-          Geri
-        </button>
+
+      {/* Navigation */}
+      <div className="flex justify-end gap-4 mt-6">
+        {adim > 0 && (
+          <button
+            onClick={geri}
+            className={`px-6 py-2 rounded-md transition-colors duration-200 ${
+              theme === 'dark'
+                ? 'bg-blue-500 text-white hover:bg-blue-600'
+                : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+            }`}
+          >
+            Geri
+          </button>
+        )}
+
         {adim === adimlar.length - 1 ? (
           <button
             onClick={handleSubmit}
-            disabled={!allQuestionsAnswered}
-            className={buttonClass(!allQuestionsAnswered)}
+            disabled={loading || !allQuestionsAnswered}
+            className={`px-6 py-2 rounded-md transition-colors duration-200 ${
+              loading || !allQuestionsAnswered
+                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                : theme === 'dark'
+                  ? 'bg-blue-500 text-white hover:bg-blue-600'
+                  : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+            }`}
           >
-            Kayıt Ol
+            {loading ? 'Kaydediliyor...' : 'Testi Tamamla'}
           </button>
         ) : (
           <button
             onClick={ileri}
             disabled={!allQuestionsAnswered}
-            className={buttonClass(!allQuestionsAnswered)}
+            className={`px-6 py-2 rounded-md transition-colors duration-200 ${
+              !allQuestionsAnswered
+                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                : theme === 'dark'
+                  ? 'bg-blue-500 text-white hover:bg-blue-600'
+                  : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+            }`}
           >
             İleri
           </button>

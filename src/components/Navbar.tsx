@@ -1,3 +1,9 @@
+/**
+ * @file    Navbar.tsx
+ * @desc    Ana navigasyon bileşeni
+ * @details Responsive tasarımlı, tema desteği olan üst menü bileşeni
+ */
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { BookOpen, User, LogOut, ChevronDown, Settings, LayoutDashboard, Menu, X } from 'lucide-react';
@@ -6,9 +12,19 @@ import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaBook } from 'react-icons/fa';
 
+/**
+ * @component Navbar
+ * @desc     Ana navigasyon çubuğu bileşeni
+ * @returns  {JSX.Element} Responsive ve tema destekli navbar
+ */
 const Navbar: React.FC = () => {
   const location = useLocation();
   const { theme } = useTheme();
+  
+  /**
+   * @state   Bileşen state'leri
+   * @desc    Navbar durumlarını yöneten state'ler
+   */
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [username, setUsername] = useState('');
@@ -16,20 +32,19 @@ const Navbar: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Token değişikliklerini dinlemek için useEffect
+  /**
+   * @effect  Authentication kontrolü
+   * @desc    Token değişikliklerini dinler ve auth durumunu günceller
+   */
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem('token');
       setIsAuthenticated(!!token);
     };
 
-    // Sayfa yüklendiğinde kontrol et
     checkAuth();
-
-    // Token değişikliklerini dinle
     window.addEventListener('storage', checkAuth);
     
-    // Custom event dinleyicisi ekle
     const handleLogout = () => {
       setIsAuthenticated(false);
       setUsername('');
@@ -43,17 +58,24 @@ const Navbar: React.FC = () => {
     };
   }, []);
 
+  /**
+   * @function handleLogout
+   * @desc     Çıkış işlemini gerçekleştirir
+   */
   const handleLogout = () => {
     localStorage.removeItem('token');
     setIsAuthenticated(false);
     setUsername('');
     setProfileImage(null);
-    // Özel logout event'ini tetikle
     window.dispatchEvent(new Event('logout'));
     window.location.href = '/';
   };
 
-  // Authenticated menu items'ı sadece giriş yapmış kullanıcılar için göster
+  /**
+   * @memo    menuItems
+   * @desc    Auth durumuna göre menü öğelerini belirler
+   * @returns {Array} Menü öğeleri dizisi
+   */
   const menuItems = useMemo(() => {
     if (!isAuthenticated) {
       return [
@@ -67,17 +89,29 @@ const Navbar: React.FC = () => {
     ];
   }, [isAuthenticated]);
 
+  /**
+   * @function handleClickOutside
+   * @desc     Dropdown dışına tıklamayı yönetir
+   */
   const handleClickOutside = (event: MouseEvent) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
       setIsDropdownOpen(false);
     }
   };
 
+  /**
+   * @effect  Click outside listener
+   * @desc    Dropdown dışı tıklamaları dinler
+   */
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  /**
+   * @effect  Kullanıcı profili
+   * @desc    Kullanıcı bilgilerini getirir
+   */
   useEffect(() => {
     const fetchUserData = async () => {
       if (isAuthenticated) {
@@ -93,6 +127,10 @@ const Navbar: React.FC = () => {
     fetchUserData();
   }, [isAuthenticated]);
 
+  /**
+   * @effect  Route değişikliği
+   * @desc    Sayfa değişiminde menüleri kapatır
+   */
   useEffect(() => {
     setIsDropdownOpen(false);
     setIsMobileMenuOpen(false);

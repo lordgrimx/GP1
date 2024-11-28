@@ -1,11 +1,26 @@
+/**
+ * @file    TestTrackPage.tsx
+ * @desc    Deneme takip sayfası
+ * @details Kullanıcının deneme sınavlarını ekleyebildiği, düzenleyebildiği ve takip edebildiği sayfa
+ */
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, X, Edit2, Trash2, ChevronDown, Link } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { getTestTracks, addTestTrack, updateTestTrack, deleteTestTrack, getTYTSubjects, Track, TestTrackRequest, getLinkedTestTracks } from '../api/api';
-import toast from 'react-hot-toast';
+import { showToast } from '../utils/toast';
 
 // Form state için interface'i güncelle
+/**
+ * @interface FormState
+ * @desc     Form verisi için tip tanımlaması
+ * 
+ * @property {string} examName - Deneme sınavı adı
+ * @property {'TYT' | 'AYT'} examType - Sınav türü
+ * @property {string} aytField - AYT alan seçimi (opsiyonel)
+ * @property {string} linkedExamId - Bağlı deneme ID'si (opsiyonel)
+ * @property {Object} subjects - Ders bazlı soru sayıları
+ */
 interface FormState {
   examName: string;
   examType: 'TYT' | 'AYT';
@@ -15,6 +30,10 @@ interface FormState {
 }
 
 // Ders başına maksimum soru sayıları
+/**
+ * @constant MAX_QUESTIONS
+ * @desc    Ders başına maksimum soru sayıları
+ */
 const MAX_QUESTIONS = {
   'TYT Türkçe': 40,
   'TYT Matematik': 32,
@@ -40,6 +59,10 @@ const MAX_QUESTIONS = {
 } as const;
 
 // AYT alan derslerini tanımla
+/**
+ * @constant AYT_FIELD_SUBJECTS
+ * @desc    AYT alan derslerini tanımlayan sabit
+ */
 const AYT_FIELD_SUBJECTS = {
   'Sayısal': ['AYT Matematik', 'AYT Fizik', 'AYT Kimya', 'AYT Biyoloji'],
   'Sözel': ['AYT Edebiyat', 'AYT Tarih-1', 'AYT Coğrafya-1', 'AYT Tarih-2', 'AYT Coğrafya-2'],
@@ -47,6 +70,10 @@ const AYT_FIELD_SUBJECTS = {
   'Yabancı Dil': ['AYT İngilizce']
 };
 
+/**
+ * @constant initialFormState
+ * @desc    Form başlangıç durumu
+ */
 const initialFormState: FormState = {
   examName: '',
   examType: 'TYT',
@@ -55,6 +82,12 @@ const initialFormState: FormState = {
 };
 
 // Bağlı denemeleri takip eden custom hook
+/**
+ * @hook useLinkedExamsScore
+ * @desc  Bağlı denemelerin yerleştirme puanlarını hesaplayan custom hook
+ * @param {Track[]} tracks - Deneme listesi
+ * @returns {Object} Yerleştirme puanları
+ */
 const useLinkedExamsScore = (tracks: Track[]) => {
   const [linkedScores, setLinkedScores] = useState<{ [key: string]: number }>({});
 
@@ -136,14 +169,27 @@ const useLinkedExamsScore = (tracks: Track[]) => {
 };
 
 // API yanıt tipi için interface
+/**
+ * @interface LinkedPair
+ * @desc     Bağlı deneme çifti için tip tanımlaması
+ */
 interface LinkedPair {
   exam1: Track;
   exam2: Track;
   finalScore: number;
 }
 
+/**
+ * @component TestTrackPage
+ * @desc     Deneme takip sayfasının ana bileşeni
+ * @returns  {JSX.Element} Deneme takip sayfası yapısı
+ */
 const TestTrackPage: React.FC = () => {
   const { theme } = useTheme();
+  /**
+   * @state States
+   * @desc  Sayfa state'leri
+   */
   const [tracks, setTracks] = useState<Track[]>([]);
   const [linkedPairs, setLinkedPairs] = useState<{[key: string]: number}>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -165,6 +211,10 @@ const TestTrackPage: React.FC = () => {
   // Verileri getir
   const [linkedResponse, setLinkedResponse] = useState<{ data: LinkedPair[] } | null>(null);
 
+   /**
+   * @effect
+   * @desc   Sayfa yüklendiğinde verileri getiren effect hook
+   */
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -180,7 +230,7 @@ const TestTrackPage: React.FC = () => {
         
       } catch (error) {
         console.error('Veri getirme hatası:', error);
-        toast.error('Denemeler yüklenirken bir hata oluştu');
+        showToast.error('Denemeler yüklenirken bir hata oluştu');
       } finally {
         setIsLoading(false);
       }
@@ -200,7 +250,7 @@ const TestTrackPage: React.FC = () => {
           setAvailableSubjects([...AYT_FIELD_SUBJECTS[aytField]]);
         }
       } catch (error) {
-        toast.error('Dersler yüklenirken bir hata oluştu');
+        showToast.error('Dersler yüklenirken bir hata oluştu');
       }
     };
 
@@ -261,9 +311,9 @@ const TestTrackPage: React.FC = () => {
     try {
       await deleteTestTrack(id);
       setTracks(tracks.filter(track => track._id !== id));
-      toast.success('Deneme başarıyla silindi');
+      showToast.success('Deneme başarıyla silindi');
     } catch (error) {
-      toast.error('Deneme silinirken bir hata oluştu');
+      showToast.error('Deneme silinirken bir hata oluştu');
     }
   };
 
@@ -509,9 +559,9 @@ const TestTrackPage: React.FC = () => {
                 )
               );
 
-              toast.success('Denemeler başarıyla bağlandı');
+              showToast.success('Denemeler başarıyla bağlandı');
             } catch (error) {
-              toast.error('Denemeler bağlanırken bir hata oluştu');
+              showToast.error('Denemeler bağlanırken bir hata oluştu');
             }
             setShowLinkModal(false);
           }}
@@ -564,18 +614,18 @@ const TestTrackPage: React.FC = () => {
               track._id === editingTrackId ? response.data : track
             )
           );
-          toast.success('Deneme başarıyla güncellendi');
+          showToast.success('Deneme başarıyla güncellendi');
         } else {
           const response = await addTestTrack(finalData);
           setTracks(prevTracks => [...prevTracks, response.data]);
-          toast.success('Deneme başarıyla eklendi');
+          showToast.success('Deneme başarıyla eklendi');
         }
         setShowForm(false);
         setEditingTrackId(null);
         setFormData(initialFormState);
         setLocalFormData(initialFormState);
       } catch (error) {
-        toast.error(editingTrackId ? 'Güncelleme başarısız' : 'Ekleme başarısız');
+        showToast.error(editingTrackId ? 'Güncelleme başarısız' : 'Ekleme başarısız');
       }
     };
 
@@ -608,7 +658,7 @@ const TestTrackPage: React.FC = () => {
         const currentTotal = currentSubject.correct + currentSubject.incorrect + currentSubject.empty;
         const remaining = maxQuestions - currentTotal;
         
-        toast.error(
+        showToast.error(
           `${subject} için kalan girilebilecek soru sayısı: ${remaining >= 0 ? remaining : 0}`
         );
         return;

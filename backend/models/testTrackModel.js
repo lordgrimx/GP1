@@ -1,5 +1,21 @@
 import mongoose from 'mongoose';
 
+/**
+ * @desc    Deneme sınavı takip şeması
+ * @details Kullanıcıların deneme sınavı sonuçlarının veritabanı modeli
+ * 
+ * @property {ObjectId} user - Sınavı çözen kullanıcının ID'si
+ * @property {String} examName - Deneme sınavının adı
+ * @property {String} examType - Sınav türü (TYT/AYT)
+ * @property {String} aytField - AYT alan türü (Sayısal/Sözel/Eşit Ağırlık/Yabancı Dil)
+ * @property {ObjectId} linkedExamId - Bağlantılı sınav ID'si (TYT-AYT eşleşmesi için)
+ * @property {Map} subjects - Her ders için doğru/yanlış/boş/net bilgileri
+ * @property {Number} totalNet - Toplam net sayısı
+ * @property {Number} examScore - Ham puan
+ * @property {Number} finalScore - Yerleştirme puanı
+ * 
+ * @hook pre-save - Net ve puan hesaplamalarını otomatik yapar
+ */
 const testTrackSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,

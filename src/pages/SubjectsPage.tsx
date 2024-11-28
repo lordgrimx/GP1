@@ -1,3 +1,9 @@
+/**
+ * @file    SubjectsPage.tsx
+ * @desc    Dersler ana sayfası
+ * @details Kullanıcının tüm dersleri, konuları ve soru sayılarını görüntüleyebildiği ana sayfa
+ */
+
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
@@ -5,6 +11,15 @@ import { Book, Calculator, BeakerIcon, Globe, Brain } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getSubjects } from '../api/api';
 
+/**
+ * @interface Subject
+ * @desc     Ders verisi için tip tanımlaması
+ * 
+ * @property {string} _id - Dersin benzersiz kimliği
+ * @property {string} Lesson - Ders adı
+ * @property {number} questionNumber - Toplam soru sayısı
+ * @property {Object} Subjects - Konular ve alt konular
+ */
 interface Subject {
   _id: string;
   Lesson: string;
@@ -14,11 +29,38 @@ interface Subject {
   };
 }
 
+/**
+ * @component SubjectsPage
+ * @desc     Tüm dersleri listeleyen ana bileşen
+ * @returns  {JSX.Element} Dersler sayfası yapısı
+ * 
+ * @states
+ * - subjects: Tüm dersler listesi
+ * - loading: Sayfa yükleme durumu
+ * 
+ * @sections
+ * - Hero Section: Başlık ve açıklama
+ * - Subjects Grid: Ders kartları grid yapısı
+ */
 const SubjectsPage: React.FC = () => {
   const { theme } = useTheme();
+
+  /**
+   * @state subjects
+   * @desc  Dersleri tutan state
+   */
   const [subjects, setSubjects] = useState<Subject[]>([]);
+
+  /**
+   * @state loading
+   * @desc  Sayfa yükleme durumunu kontrol eden state
+   */
   const [loading, setLoading] = useState(true);
 
+  /**
+   * @effect
+   * @desc   Sayfa yüklendiğinde dersleri getiren effect hook
+   */
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
@@ -34,6 +76,12 @@ const SubjectsPage: React.FC = () => {
     fetchSubjects();
   }, []);
 
+  /**
+   * @function getSubjectIcon
+   * @desc     Ders adına göre ikon döndüren yardımcı fonksiyon
+   * @param    {string} lessonName - Ders adı
+   * @returns  {JSX.Element} Ders ikonu
+   */
   const getSubjectIcon = (lessonName: string) => {
     switch (lessonName) {
       case 'TYT Türkçe':
@@ -54,6 +102,12 @@ const SubjectsPage: React.FC = () => {
     }
   };
 
+  /**
+   * @function getSubjectColor
+   * @desc     Ders adına göre renk döndüren yardımcı fonksiyon
+   * @param    {string} lessonName - Ders adı
+   * @returns  {string} Renk kodu
+   */
   const getSubjectColor = (lessonName: string) => {
     switch (lessonName) {
       case 'TYT Türkçe': return 'blue';
@@ -128,8 +182,6 @@ const SubjectsPage: React.FC = () => {
           ))}
         </div>
       </motion.div>
-
-      {/* Stats Section aynı kalabilir */}
     </div>
   );
 };

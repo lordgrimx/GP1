@@ -1,3 +1,9 @@
+/**
+ * @file    CameraButton.tsx
+ * @desc    Kamera ve soru çözüm bileşeni
+ * @details Kamera erişimi, fotoğraf çekme, dosya yükleme ve AI çözüm entegrasyonu
+ */
+
 import React, { useState, useRef, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import { Camera, X, History, ChevronDown, ChevronUp } from 'lucide-react';
@@ -10,13 +16,33 @@ import { saveQuestionWithSolution, getUserQuestions } from '../api/api';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { motion } from 'framer-motion';
 
+/**
+ * @interface CameraButtonProps
+ * @desc     Bileşen props tanımları
+ * @property {string} apiKey - Gemini AI API anahtarı
+ * @property {string} model - Kullanılacak AI model adı
+ * @property {string} [className] - Opsiyonel CSS sınıfları
+ */
 interface CameraButtonProps {
   apiKey: string;
   model: string;
   className?: string;
 }
+
+/**
+ * @type     TabValue
+ * @desc     Sekme değerleri için tip tanımı
+ */
 type TabValue = 'camera' | 'history';
 
+/**
+ * @interface SolvedQuestion
+ * @desc     Çözülmüş soru verisi için tip tanımı
+ * @property {string} _id - Soru ID'si
+ * @property {string} imageData - Soru görseli (base64)
+ * @property {string} solution - AI tarafından üretilen çözüm
+ * @property {string} createdAt - Oluşturulma tarihi
+ */
 interface SolvedQuestion {
   _id: string;
   imageData: string;
@@ -24,6 +50,13 @@ interface SolvedQuestion {
   createdAt: string;
 }
 
+/**
+ * @component QuestionCard
+ * @desc     Çözülmüş soru kartı bileşeni
+ * @param    {Object} props - Bileşen props'ları
+ * @param    {SolvedQuestion} props.question - Soru verisi
+ * @param    {number} props.index - Soru indeksi
+ */
 const QuestionCard: React.FC<{ question: SolvedQuestion; index: number }> = ({ question, index }) => {
   const { theme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -81,6 +114,11 @@ const QuestionCard: React.FC<{ question: SolvedQuestion; index: number }> = ({ q
   );
 };
 
+/**
+ * @component CameraButton
+ * @desc     Ana kamera ve soru çözüm bileşeni
+ * @param    {CameraButtonProps} props - Bileşen props'ları
+ */
 const CameraButton: React.FC<CameraButtonProps> = ({ apiKey, model, className = '' }) => {
   const { theme } = useTheme();
   const webcamRef = useRef<Webcam>(null);
@@ -92,6 +130,11 @@ const CameraButton: React.FC<CameraButtonProps> = ({ apiKey, model, className = 
   const [solvedQuestions, setSolvedQuestions] = useState<SolvedQuestion[]>([]);
   const [showSolution, setShowSolution] = useState(false);
 
+  /**
+   * @effect
+   * @desc   Çözülmüş soruları getirme
+   * @note   showCamera veya activeTab değiştiğinde tetiklenir
+   */
   useEffect(() => {
     const fetchSolvedQuestions = async () => {
       try {
@@ -108,6 +151,10 @@ const CameraButton: React.FC<CameraButtonProps> = ({ apiKey, model, className = 
     }
   }, [showCamera, activeTab]);
 
+  /**
+   * @function handleCapture
+   * @desc     Kameradan fotoğraf çekme işlemi
+   */
   const handleCapture = async () => {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
@@ -117,6 +164,11 @@ const CameraButton: React.FC<CameraButtonProps> = ({ apiKey, model, className = 
     }
   };
 
+  /**
+   * @function handleFileUpload
+   * @desc     Dosya yükleme işlemi
+   * @param    {React.ChangeEvent<HTMLInputElement>} event
+   */
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -136,6 +188,11 @@ const CameraButton: React.FC<CameraButtonProps> = ({ apiKey, model, className = 
     }
   };
 
+  /**
+   * @function processImage
+   * @desc     Görüntü işleme ve AI analizi
+   * @param    {string} base64Data - Base64 formatında görüntü verisi
+   */
   const processImage = async (base64Data: string) => {
     try {
       setLoading(true);
@@ -181,7 +238,7 @@ const CameraButton: React.FC<CameraButtonProps> = ({ apiKey, model, className = 
 
       const response = await result.response;
       const solution = response.text();
-      
+      console.log(solution);
       setAnalysisResult(solution);
       setShowSolution(true);
       setShowCamera(false);

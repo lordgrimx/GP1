@@ -1,6 +1,11 @@
 import Subject from '../models/subjectModel.js';
 
-// Tüm dersleri getir
+/**
+ * @desc    Tüm dersleri getirir
+ * @route   GET /api/subjects
+ * @access  Public
+ * @returns {array} Tüm derslerin listesi
+ */
 export const getSubjects = async (req, res) => {
   try {
     const subjects = await Subject.find({});
@@ -11,7 +16,13 @@ export const getSubjects = async (req, res) => {
   }
 };
 
-// Belirli bir dersi ID ile getir
+/**
+ * @desc    Belirli bir dersi ID'ye göre getirir
+ * @route   GET /api/subjects/:id
+ * @access  Public
+ * @param   {string} id - Ders ID'si
+ * @returns {object} Ders detayları
+ */
 export const getSubjectById = async (req, res) => {
   try {
     const subject = await Subject.findById(req.params.id);
@@ -26,7 +37,15 @@ export const getSubjectById = async (req, res) => {
   }
 };
 
-// Yeni bir ders ekle
+/**
+ * @desc    Yeni bir ders ekler
+ * @route   POST /api/subjects
+ * @access  Private
+ * @param   {string} lesson - Ders adı
+ * @param   {number} questionNumber - Soru sayısı
+ * @param   {array} subjects - Alt konular listesi
+ * @returns {object} Oluşturulan ders bilgileri
+ */
 export const addSubject = async (req, res) => {
   const { lesson, questionNumber, subjects } = req.body;
 
@@ -45,7 +64,16 @@ export const addSubject = async (req, res) => {
   }
 };
 
-// Belirli bir dersi güncelle
+/**
+ * @desc    Mevcut bir dersi günceller
+ * @route   PUT /api/subjects/:id
+ * @access  Private
+ * @param   {string} id - Güncellenecek ders ID'si
+ * @param   {string} lesson - Yeni ders adı
+ * @param   {number} questionNumber - Yeni soru sayısı
+ * @param   {array} subjects - Yeni alt konular listesi
+ * @returns {object} Güncellenmiş ders bilgileri
+ */
 export const updateSubject = async (req, res) => {
   const { lesson, questionNumber, subjects } = req.body;
 
@@ -68,7 +96,13 @@ export const updateSubject = async (req, res) => {
   }
 };
 
-// Belirli bir dersi sil
+/**
+ * @desc    Bir dersi siler
+ * @route   DELETE /api/subjects/:id
+ * @access  Private
+ * @param   {string} id - Silinecek ders ID'si
+ * @returns {object} Silme işlemi onay mesajı
+ */
 export const deleteSubject = async (req, res) => {
   try {
     const subject = await Subject.findById(req.params.id);
@@ -85,7 +119,12 @@ export const deleteSubject = async (req, res) => {
   }
 };
 
-// Ders adlarını getir
+/**
+ * @desc    Tüm ders adlarını getirir
+ * @route   GET /api/subjects/names
+ * @access  Public
+ * @returns {array} Ders adları listesi
+ */
 export const getSubjectNames = async (req, res) => {
   try {
     const subjects = await Subject.find({}).select('Lesson -_id');
@@ -99,7 +138,13 @@ export const getSubjectNames = async (req, res) => {
   }
 };
 
-// TYT derslerini getir
+/**
+ * @desc    TYT derslerini getirir
+ * @route   GET /api/subjects/tyt
+ * @access  Public
+ * @returns {array} TYT dersleri listesi
+ * @details Ders adı "TYT" ile başlayan dersleri filtreler
+ */
 export const getTYTSubjects = async (req, res) => {
   try {
     const subjects = await Subject.find({
@@ -120,7 +165,13 @@ export const getTYTSubjects = async (req, res) => {
   }
 };
 
-// AYT derslerini getir
+/**
+ * @desc    AYT derslerini getirir
+ * @route   GET /api/subjects/ayt
+ * @access  Public
+ * @returns {array} AYT dersleri listesi
+ * @details Ders adı "AYT" ile başlayan dersleri filtreler
+ */
 export const getAYTSubjects = async (req, res) => {
   try {
     const subjects = await Subject.find({
@@ -141,7 +192,15 @@ export const getAYTSubjects = async (req, res) => {
   }
 };
 
-// Yeni controller fonksiyonu
+/**
+ * @desc    Bir konunun yeterlilik seviyesini günceller
+ * @route   PUT /api/subjects/:id/proficiency
+ * @access  Private
+ * @param   {string} id - Ders ID'si
+ * @param   {string} topicName - Konu adı
+ * @param   {number} level - Yeterlilik seviyesi
+ * @returns {object} Güncelleme durumu ve yeni seviye bilgisi
+ */
 export const updateSubjectProficiency = async (req, res) => {
   try {
     const { topicName, level } = req.body;

@@ -1,6 +1,5 @@
 import User from '../models/userModel.js';
 import generateToken from '../utils/generateToken.js';
-import path from 'path';
 import fs from 'fs';
 import defaultPP from '../defaultPP.json' assert { type: 'json' };
 import StudySession from '../models/studySession.js';
@@ -8,7 +7,17 @@ import TestResult from '../models/testResult.js';
 import { startOfWeek, endOfWeek, eachDayOfInterval, format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
-// Kullanıcı kaydı
+/**
+ * @desc    Yeni kullanıcı kaydı oluşturur
+ * @route   POST /api/users/register
+ * @access  Public
+ * @param   {string} username - Kullanıcı adı
+ * @param   {string} email - E-posta adresi
+ * @param   {string} password - Şifre
+ * @param   {string} profileImage - Profil fotoğrafı (opsiyonel)
+ * @param   {string} typeofintelligence - Zeka türü
+ * @returns {object} Kayıt durumu mesajı
+ */
 export const registerUser = async (req, res) => {
   const { username, email, password, profileImage, typeofintelligence } = req.body;
 
@@ -39,7 +48,14 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// Kullanıcı girişi
+/**
+ * @desc    Kullanıcı girişi yapar
+ * @route   POST /api/users/login
+ * @access  Public
+ * @param   {string} identifier - Kullanıcı adı veya e-posta
+ * @param   {string} password - Şifre
+ * @returns {object} Kullanıcı bilgileri ve JWT token
+ */
 export const loginUser = async (req, res) => {
   const { identifier, password } = req.body;
 
@@ -73,7 +89,12 @@ export const loginUser = async (req, res) => {
   }
 };
 
-// Kullanıcı profilini getirme
+/**
+ * @desc    Kullanıcı profilini getirir
+ * @route   GET /api/users/profile
+ * @access  Private
+ * @returns {object} Kullanıcı profil bilgileri
+ */
 export const getUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('-password');
@@ -88,7 +109,14 @@ export const getUserProfile = async (req, res) => {
   }
 };
 
-// Kullanıcı şifresini güncelleme
+/**
+ * @desc    Kullanıcı şifresini günceller
+ * @route   PUT /api/users/password
+ * @access  Private
+ * @param   {string} oldPassword - Eski şifre
+ * @param   {string} newPassword - Yeni şifre
+ * @returns {object} Güncelleme durumu mesajı
+ */
 export const updateUserPassword = async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
@@ -112,29 +140,83 @@ export const updateUserPassword = async (req, res) => {
   }
 };
 
-// Kullanıcı profil fotoğrafını güncelleme
+/**
+ * @desc    Kullanıcı profil fotoğrafını günceller
+ * @route   PUT /api/users/profile-photo
+ * @access  Private
+ * @param   {File} profileImage - Yüklenecek profil fotoğrafı
+ * @returns {object} Güncellenen profil fotoğrafı URL'si
+ */
 export const updateUserProfilePhoto = async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      return res.status(404).json({ message: 'Kullanıcı bulunamadı' });
-    }
+    try {
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ message: 'Kullanıcı bulunamadı' });
+        }
 
-    if (req.file) {
-      const base64Image = fs.readFileSync(req.file.path).toString('base64'); // Dosyayı Base64 formatına çevir
-      user.profileImage = `data:${req.file.mimetype};base64,${base64Image}`; // Base64 formatında kaydet
-      await user.save();
-      res.json({ message: 'Profil fotoğrafı başarıyla güncellendi', profileImage: user.profileImage });
-    } else {
-      res.status(400).json({ message: 'Dosya yüklenmedi' });
+        // Dosya kontrolü
+        if (!req.file) {
+            return res.status(400).json({ message: 'Dosya yüklenmedi' });
+        }
+
+        // Debug log
+        console.log('Yüklenen dosya:', {
+            fieldname: req.file.fieldname,
+            mimetype: req.file.mimetype,
+            size: req.file.size,
+            buffer: req.file.buffer ? 'Buffer mevcut' : 'Buffer yok'
+        });
+
+        try {
+            // Buffer'ı base64'e çevir
+            const base64Image = req.file.buffer.toString('base64');
+            const imageUrl = `data:${req.file.mimetype};base64,${base64Image}`;
+
+            // Debug log
+            console.log('Base64 dönüşümü yapıldı, uzunluk:', imageUrl.length);
+
+            // Kullanıcı belgesini güncelle
+            user.profileImage = imageUrl;
+            const updatedUser = await user.save();
+
+            // Debug log
+            console.log('Kullanıcı güncellendi:', {
+                userId: updatedUser._id,
+                hasProfileImage: !!updatedUser.profileImage
+            });
+
+            return res.json({ 
+                success: true,
+                message: 'Profil fotoğrafı başarıyla güncellendi', 
+                profileImage: updatedUser.profileImage 
+            });
+        } catch (conversionError) {
+            console.error('Base64 dönüşüm hatası:', conversionError);
+            return res.status(500).json({ 
+                message: 'Resim dönüştürme işlemi başarısız oldu',
+                error: conversionError.message 
+            });
+        }
+    } catch (error) {
+        console.error('Profil fotoğrafı güncellenirken hata oluştu:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Sunucu hatası',
+            error: error.message 
+        });
     }
-  } catch (error) {
-    console.error('Profil fotoğrafı güncellenirken hata oluştu:', error);
-    res.status(500).json({ message: 'Sunucu hatası' });
-  }
 };
 
-// Kullanıcı profilini güncelleme (genel bilgi)
+/**
+ * @desc    Kullanıcı profil bilgilerini günceller
+ * @route   PUT /api/users/profile
+ * @access  Private
+ * @param   {string} username - Yeni kullanıcı adı (opsiyonel)
+ * @param   {string} email - Yeni e-posta (opsiyonel)
+ * @param   {string} profileImage - Yeni profil fotoğrafı (opsiyonel)
+ * @param   {string} typeofintelligence - Yeni zeka türü (opsiyonel)
+ * @returns {object} Güncellenmiş kullanıcı bilgileri
+ */
 export const updateUserProfile = async (req, res) => {
   const { username, email, profileImage, typeofintelligence } = req.body;
 
@@ -158,7 +240,12 @@ export const updateUserProfile = async (req, res) => {
   }
 };
 
-// Kullanıcının zeka türlerini getirme
+/**
+ * @desc    Kullanıcının zeka türlerini getirir
+ * @route   GET /api/users/intelligence
+ * @access  Private
+ * @returns {array} Kullanıcının zeka türleri listesi
+ */
 export const getUserIntelligence = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('typeOfIntelligence'); // Sadece typeOfIntelligence alanını seç
@@ -172,7 +259,55 @@ export const getUserIntelligence = async (req, res) => {
     res.status(500).json({ message: 'Server error', error });
   }
 };
+/**
+ * @function checkUserExists
+ * @desc     Kullanıcı adı veya email'in sistemde kayıtlı olup olmadığını kontrol eder
+ * @route    POST /api/users/check
+ * @access   Public
+ * 
+ * @param    {Object} req - Express request nesnesi
+ * @param    {Object} req.body - İstek gövdesi
+ * @param    {string} req.body.username - Kontrol edilecek kullanıcı adı
+ * @param    {string} req.body.email - Kontrol edilecek email adresi
+ * 
+ * @param    {Object} res - Express response nesnesi
+ * 
+ * @returns  {Object} Kontrol sonucu
+ * @property {boolean} exists - Kullanıcının var olup olmadığı
+ * @property {string} message - Sonuç mesajı
+ * 
+ * @throws   {Error} Veritabanı sorgusu başarısız olursa
+ */
+export const checkUserExists = async (req, res) => {
+  const { username, email } = req.body;
 
+  try {
+    const userExists = await User.findOne({
+      $or: [
+        { email: email.toLowerCase() },
+        { username: username.trim() }
+      ]
+    });
+
+    res.json({
+      exists: !!userExists,
+      message: userExists ? 'Kullanıcı zaten mevcut' : 'Kullanıcı mevcut değil'
+    });
+  } catch (error) {
+    console.error('User check error:', error);
+    res.status(500).json({ 
+      message: 'Kullanıcı kontrolü sırasında bir hata oluştu', 
+      error: error.message 
+    });
+  }
+};
+
+/**
+ * @desc    Kullanıcının genel istatistiklerini getirir
+ * @route   GET /api/users/stats
+ * @access  Private
+ * @returns {object} Toplam çalışma süresi, tamamlanan konular, soru sayısı vb.
+ */
 export const getUserStats = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -216,18 +351,33 @@ export const getUserStats = async (req, res) => {
   }
 };
 
-// Yardımcı fonksiyonlar
+/**
+ * @desc    Çalışma serisini hesaplar
+ * @param   {array} sessions - Çalışma oturumları listesi
+ * @returns {number} Kesintisiz çalışma günü sayısı
+ */
 const calculateStudyStreak = (sessions) => {
   if (!sessions.length) return 0;
   // Streak hesaplama mantığı...
   return 1; // Basit bir başlangıç değeri
 };
 
+/**
+ * @desc    Haftalık ilerleme verilerini hesaplar
+ * @param   {array} results - Test sonuçları listesi
+ * @returns {array} Son 7 günün ilerleme verileri
+ */
 const calculateWeeklyProgress = (results) => {
   // Son 7 günün verilerini döndür
   return Array(7).fill(0).map(() => Math.floor(Math.random() * 100)); // Örnek veri
 };
 
+/**
+ * @desc    Haftalık ilerleme detaylarını getirir
+ * @route   GET /api/users/weekly-progress
+ * @access  Private
+ * @returns {object} Günlük ilerleme puanları ve gün etiketleri
+ */
 export const getWeeklyProgress = async (req, res) => {
   try {
     const userId = req.user._id;

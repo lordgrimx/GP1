@@ -1,5 +1,14 @@
 import mongoose from 'mongoose';
 
+/**
+ * @desc    Soru şeması
+ * @details Kullanıcıların kaydettiği soruların veritabanı modeli
+ * 
+ * @property {ObjectId} user - Soruyu kaydeden kullanıcının ID'si
+ * @property {String} imageData - Soru resminin base64 formatında verisi
+ * @property {String} solution - Sorunun çözümü/cevabı
+ * @property {Date} createdAt - Sorunun kaydedilme tarihi
+ */
 const questionSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,

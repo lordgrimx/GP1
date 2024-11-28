@@ -4,6 +4,12 @@ import { saveQuestion, getUserQuestions } from '../controllers/questionControlle
 
 const router = express.Router();
 
+/**
+ * @desc    Soru route'ları
+ * @routes
+ *   POST /api/questions - Yeni soru kaydet (Protected)
+ *   GET /api/questions - Kullanıcının sorularını getir (Protected)
+ */
 router.post('/', protect, saveQuestion);
 router.get('/', protect, getUserQuestions);
 

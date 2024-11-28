@@ -1,25 +1,75 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
-import { Book, Target, Clock, TrendingUp, Calendar, BarChart2 } from 'lucide-react';
+import { Book, Target, Clock, TrendingUp} from 'lucide-react';
 import WeeklyProgressChart from '../components/WeeklyProgressChart';
 import UserStatsGraphs from '../components/UserStatsGraphs';
 import api from '../api/api';
 
+/**
+ * @interface WeeklyProgressData
+ * @desc     Haftalık ilerleme verilerinin tip tanımlaması
+ * 
+ * @property {number[]} weeklyProgress - Haftalık ilerleme yüzdelerini içeren dizi
+ * @property {string[]} labels - İlerleme verilerine karşılık gelen tarih etiketleri
+ */
 interface WeeklyProgressData {
   weeklyProgress: number[];
   labels: string[];
 }
 
+/**
+ * @component DashboardPage
+ * @desc     Kullanıcı gösterge paneli ana bileşeni
+ * @returns  {JSX.Element} Dashboard yapısı
+ * 
+ * @states
+ * - weeklyData: Haftalık ilerleme verileri
+ * - loading: Veri yükleme durumu
+ * - error: Hata durumu
+ * 
+ * @sections
+ * - Stats Cards: Özet istatistik kartları
+ * - Weekly Progress: Haftalık ilerleme grafiği
+ * - User Stats: Detaylı kullanıcı istatistikleri
+ * 
+ * @styles
+ * - bg-gray-900/bg-gray-100: Tema bazlı arka plan rengi
+ * - text-white/text-gray-800: Tema bazlı metin rengi
+ */
 const DashboardPage: React.FC = () => {
   const { theme } = useTheme();
+  
+  /**
+   * @state weeklyData
+   * @desc  Haftalık ilerleme verilerini tutan state
+   * @type  {WeeklyProgressData}
+   */
   const [weeklyData, setWeeklyData] = useState<WeeklyProgressData>({
     weeklyProgress: [],
     labels: []
   });
+  
+  /**
+   * @state loading
+   * @desc  Veri yükleme durumunu kontrol eden state
+   * @type  {boolean}
+   */
   const [loading, setLoading] = useState(true);
+  
+  /**
+   * @state error
+   * @desc  Hata durumunu tutan state
+   * @type  {string | null}
+   */
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * @function fetchWeeklyProgress
+   * @desc     Haftalık ilerleme verilerini API'den çeken asenkron fonksiyon
+   * @async
+   * @returns  {Promise<void>}
+   */
   const fetchWeeklyProgress = async () => {
     try {
       setLoading(true);
@@ -34,6 +84,10 @@ const DashboardPage: React.FC = () => {
     }
   };
 
+  /**
+   * @effect
+   * @desc   Sayfa yüklendiğinde verileri çeken effect hook
+   */
   useEffect(() => {
     fetchWeeklyProgress();
   }, []);
@@ -41,8 +95,9 @@ const DashboardPage: React.FC = () => {
   return (
     <div className={`${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-800'}`}>
       <div className="container mx-auto px-4 py-8">
-        {/* İstatistik Kartları */}
+        {/* Stats Cards Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          {/* Çalışma Süresi Kartı */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -58,6 +113,7 @@ const DashboardPage: React.FC = () => {
             </div>
           </motion.div>
 
+          {/* Soru Sayısı Kartı */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -73,6 +129,7 @@ const DashboardPage: React.FC = () => {
             </div>
           </motion.div>
 
+          {/* Başarı Oranı Kartı */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -89,7 +146,7 @@ const DashboardPage: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* Haftalık İlerleme Grafiği */}
+        {/* Weekly Progress Chart Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -118,7 +175,7 @@ const DashboardPage: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* Diğer İstatistik Grafikleri */}
+        {/* User Stats Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

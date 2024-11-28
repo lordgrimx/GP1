@@ -1,3 +1,9 @@
+/**
+ * @file    SolvedQuestionsPage.tsx
+ * @desc    Çözülmüş sorular sayfası
+ * @details Kullanıcının çözdüğü soruları, çözümlerini ve tarihlerini görüntüleyebildiği sayfa
+ */
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
@@ -7,8 +13,17 @@ import { useTheme } from '../context/ThemeContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { getUserQuestions } from '../api/api';
 import ReactMarkdown from 'react-markdown';
-import toast from 'react-hot-toast';
+import { showToast } from '../utils/toast';
 
+/**
+ * @interface Question
+ * @desc     Çözülmüş soru verisi için tip tanımlaması
+ * 
+ * @property {string} _id - Sorunun benzersiz kimliği
+ * @property {string} imageData - Soru görselinin base64 formatında verisi
+ * @property {string} solution - Sorunun çözümü
+ * @property {string} createdAt - Çözüm tarihi
+ */
 interface Question {
   _id: string;
   imageData: string;
@@ -16,39 +31,99 @@ interface Question {
   createdAt: string;
 }
 
+/**
+ * @component SolvedQuestionsPage
+ * @desc     Çözülmüş soruları listeleyen ve filtreleme imkanı sunan bileşen
+ * @returns  {JSX.Element} Çözülmüş sorular sayfası yapısı
+ * 
+ * @states
+ * - questions: Tüm çözülmüş sorular listesi
+ * - loading: Sayfa yükleme durumu
+ * - searchTerm: Arama filtresi
+ * - sortOrder: Sıralama düzeni (asc/desc)
+ * 
+ * @animations
+ * - containerVariants: Liste animasyonu için kapsayıcı varyantları
+ * - itemVariants: Her bir soru kartı için animasyon varyantları
+ * 
+ * @sections
+ * - Search Bar: Çözüm arama alanı
+ * - Sort Button: Tarih sıralama butonu
+ * - Question List: Çözülmüş sorular listesi
+ */
 const SolvedQuestionsPage: React.FC = () => {
   const { theme } = useTheme();
+
+  /**
+   * @state questions
+   * @desc  Çözülmüş soruları tutan state
+   */
   const [questions, setQuestions] = useState<Question[]>([]);
+
+  /**
+   * @state loading
+   * @desc  Sayfa yükleme durumunu kontrol eden state
+   */
   const [loading, setLoading] = useState(true);
+
+  /**
+   * @state searchTerm
+   * @desc  Arama filtresini tutan state
+   */
   const [searchTerm, setSearchTerm] = useState('');
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  /**
+   * @state sortOrder
+   * @desc  Sıralama düzenini tutan state
+   */
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
+  /**
+   * @effect
+   * @desc   Sayfa yüklendiğinde soruları getiren effect hook
+   */
   useEffect(() => {
     fetchQuestions();
   }, []);
 
+  /**
+   * @function fetchQuestions
+   * @desc     Çözülmüş soruları API'den çeken asenkron fonksiyon
+   * @async
+   */
   const fetchQuestions = async () => {
     try {
       const response = await getUserQuestions();
       setQuestions(response.data);
     } catch (error) {
-      toast.error('Sorular yüklenirken bir hata oluştu');
+      showToast.error('Sorular yüklenirken bir hata oluştu');
     } finally {
       setLoading(false);
     }
   };
 
+  /**
+   * @constant filteredQuestions
+   * @desc    Arama terimine göre filtrelenmiş sorular
+   */
   const filteredQuestions = questions.filter(question =>
     question.solution.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  /**
+   * @constant sortedQuestions
+   * @desc    Tarihe göre sıralanmış sorular
+   */
   const sortedQuestions = [...filteredQuestions].sort((a, b) => {
     const dateA = new Date(a.createdAt).getTime();
     const dateB = new Date(b.createdAt).getTime();
     return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
   });
 
+  /**
+   * @constant containerVariants
+   * @desc    Liste animasyonu için kapsayıcı varyantları
+   */
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -59,6 +134,10 @@ const SolvedQuestionsPage: React.FC = () => {
     }
   };
 
+  /**
+   * @constant itemVariants
+   * @desc    Her bir soru kartı için animasyon varyantları
+   */
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
     visible: {

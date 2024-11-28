@@ -1,12 +1,27 @@
+/**
+ * @file    SubjectDetailPage.tsx
+ * @desc    Konu detay sayfası
+ * @details Kullanıcının ders konularını görüntüleyebildiği, yetkinlik seviyesini belirleyebildiği ve AI destekli konu anlatımı alabildiği sayfa
+ */
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import { Book, ChevronDown } from 'lucide-react';
 import { getSubjectById, updateSubjectProficiency, getUserIntelligence } from '../api/api';
-import { toast } from 'react-hot-toast';
+import { showToast } from '../utils/toast';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+/**
+ * @interface Subject
+ * @desc     Konu verisi için tip tanımlaması
+ * 
+ * @property {string} _id - Konunun benzersiz kimliği
+ * @property {string} Lesson - Ders adı
+ * @property {number} questionNumber - Soru sayısı
+ * @property {Object} Subjects - Alt konular ve zorluk seviyeleri
+ * @property {Object} proficiencyLevels - Yetkinlik seviyeleri
+ */
 interface Subject {
   _id: string;
   Lesson: string;
@@ -19,18 +34,44 @@ interface Subject {
   };
 }
 
+/**
+ * @interface ProficiencyLevel
+ * @desc     Yetkinlik seviyesi verisi için tip tanımlaması
+ */
 interface ProficiencyLevel {
   [key: string]: number;
 }
 
+/**
+ * @interface Intelligence
+ * @desc     Zeka türü verisi için tip tanımlaması
+ */
 interface Intelligence {
   type: string;
   score: number;
 }
 
+/**
+ * @component SubjectDetailPage
+ * @desc     Konu detaylarını ve AI destekli konu anlatımını yöneten bileşen
+ * @returns  {JSX.Element} Konu detay sayfası yapısı
+ * 
+ * @states
+ * - subject: Konu detay verisi
+ * - loading: Sayfa yükleme durumu
+ * - showProficiency: Yetkinlik seçimi görünürlüğü
+ * - proficiencyLevels: Yetkinlik seviyeleri
+ * - userIntelligence: Kullanıcı zeka türleri
+ * - aiResponse: AI yanıtı
+ * - showResponseModal: AI yanıt modalı görünürlüğü
+ */
 const SubjectDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { theme } = useTheme();
+  /**
+   * @state States
+   * @desc  Sayfa state'leri
+   */
   const [subject, setSubject] = useState<Subject | null>(null);
   const [loading, setLoading] = useState(true);
   const [showProficiency, setShowProficiency] = useState<{ [key: string]: boolean }>({});
@@ -39,6 +80,10 @@ const SubjectDetailPage: React.FC = () => {
   const [aiResponse, setAIResponse] = useState<string>('');
   const [showResponseModal, setShowResponseModal] = useState(false);
 
+  /**
+   * @effect
+   * @desc   Konu detaylarını getiren effect hook
+   */
   useEffect(() => {
     const fetchSubject = async () => {
       try {
@@ -55,7 +100,7 @@ const SubjectDetailPage: React.FC = () => {
         }
       } catch (error) {
         console.error('Error fetching subject:', error);
-        toast.error('Konu bilgileri yüklenirken bir hata oluştu');
+        showToast.error('Konu bilgileri yüklenirken bir hata oluştu');
       } finally {
         setLoading(false);
       }
@@ -66,6 +111,10 @@ const SubjectDetailPage: React.FC = () => {
     }
   }, [id]);
 
+  /**
+   * @effect
+   * @desc   Kullanıcı zeka türlerini getiren effect hook
+   */
   useEffect(() => {
     const fetchUserIntelligence = async () => {
       try {
@@ -80,13 +129,18 @@ const SubjectDetailPage: React.FC = () => {
         
       } catch (error) {
         console.error('Zeka türleri getirilemedi:', error);
-        toast.error('Zeka türleri yüklenirken bir hata oluştu');
+        showToast.error('Zeka türleri yüklenirken bir hata oluştu');
       }
     };
 
     fetchUserIntelligence();
   }, []);
 
+  /**
+   * @function getTopThreeIntelligences
+   * @desc     En yüksek üç zeka türünü döndüren fonksiyon
+   * @returns  {Intelligence[]} En yüksek üç zeka türü
+   */
   const getTopThreeIntelligences = () => {
     if (!userIntelligence || userIntelligence.length === 0) {
       return [
@@ -101,6 +155,12 @@ const SubjectDetailPage: React.FC = () => {
       .slice(0, 3);
   };
 
+  /**
+   * @function getProficiencyLevel
+   * @desc     Yetkinlik seviyesini metin olarak döndüren fonksiyon
+   * @param    {number} level - Yetkinlik seviyesi
+   * @returns  {string} Yetkinlik seviyesi metni
+   */
   const getProficiencyLevel = (level: number) => {
     switch(level) {
       case 1: return "very low";
@@ -112,6 +172,11 @@ const SubjectDetailPage: React.FC = () => {
     }
   };
 
+  /**
+   * @function handleProficiencySelect
+   * @desc     Yetkinlik seviyesi seçimini işleyen fonksiyon
+   * @async
+   */
   const handleProficiencySelect = async (topicName: string, level: number) => {
     try {
       const response = await updateSubjectProficiency(id!, topicName, level);
@@ -127,14 +192,19 @@ const SubjectDetailPage: React.FC = () => {
           [topicName]: false
         }));
         
-        toast.success('Seviye başarıyla kaydedildi');
+        showToast.success('Seviye başarıyla kaydedildi');
       }
     } catch (error) {
       console.error('Seviye kaydedilirken hata:', error);
-      toast.error('Seviye kaydedilirken bir hata oluştu');
+      showToast.error('Seviye kaydedilirken bir hata oluştu');
     }
   };
 
+   /**
+   * @function handleTeachSubject
+   * @desc     AI destekli konu anlatımını başlatan fonksiyon
+   * @async
+   */
   const handleTeachSubject = async (topicName: string) => {
     try {
       const topIntelligences = getTopThreeIntelligences();
@@ -155,7 +225,7 @@ IMPORTANT: Please provide your response in Turkish language.`;
       setLoading(true);
 
       const genAI = new GoogleGenerativeAI(import.meta.env.VITE_API_KEY);
-      const geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+      const geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
       const result = await geminiModel.generateContent([prompt]);
       const response = await result.response;
@@ -166,7 +236,7 @@ IMPORTANT: Please provide your response in Turkish language.`;
 
     } catch (error) {
       console.error('Gemini API hatası:', error);
-      toast.error('Konu anlatımı alınırken bir hata oluştu');
+      showToast.error('Konu anlatımı alınırken bir hata oluştu');
     } finally {
       setLoading(false);
     }

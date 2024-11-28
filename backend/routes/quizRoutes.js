@@ -4,6 +4,14 @@ import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
+/**
+ * @desc    Quiz route'ları
+ * @routes
+ *   POST /api/quizzes - Yeni quiz oluştur (Protected)
+ *   GET /api/quizzes - Tüm quizleri getir (Protected)
+ *   GET /api/quizzes/:id - Belirli bir quizi getir (Protected)
+ *   POST /api/quizzes/:id/attempt - Quiz denemesi gönder (Protected)
+ */
 router.post('/', protect, createQuiz);
 router.get('/', protect, getQuizzes);
 router.get('/:id', protect, getQuizById);

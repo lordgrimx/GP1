@@ -1,123 +1,177 @@
-import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
-import toast from 'react-hot-toast';
+/**
+ * @file    PomodoroModal.tsx
+ * @desc    Pomodoro zamanlayıcı modal bileşeni
+ * @details Pomodoro tekniği için zamanlayıcı ve tur takibi yapan modal
+ */
 
+import { useState, useEffect } from 'react';
+import { X, Play, Pause, RotateCcw } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+import showToast from '../utils/toast';
+
+/**
+ * @interface PomodoroModalProps
+ * @desc     Modal props tanımları
+ * @property {boolean} isOpen - Modalın görünürlük durumu
+ * @property {Function} onClose - Modal kapatma fonksiyonu
+ */
 interface PomodoroModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+/**
+ * @component PomodoroModal
+ * @desc     Pomodoro zamanlayıcı modal bileşeni
+ * @param    {PomodoroModalProps} props - Bileşen props'ları
+ */
 const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose }) => {
   const { theme } = useTheme();
-  const [time, setTime] = useState(25 * 60); // 25 dakika
-  const [isActive, setIsActive] = useState(false);
-  const [currentRound, setCurrentRound] = useState(1);
-  const totalRounds = 4;
 
+  /**
+   * @state   Zamanlayıcı state'leri
+   * @desc    Pomodoro durumlarını yöneten state'ler
+   */
+  const [timeLeft, setTimeLeft] = useState(25 * 60); // 25 dakika
+  const [isRunning, setIsRunning] = useState(false);
+  const [currentMode, setCurrentMode] = useState<'work' | 'break'>('work');
+
+  /**
+   * @effect  Zamanlayıcı
+   * @desc    Aktif durumdayken zamanı geri sayar
+   */
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let timer: NodeJS.Timeout;
 
-    if (isActive && time > 0) {
-      interval = setInterval(() => {
-        setTime((prevTime) => {
-          const newTime = prevTime - 1;
-          if (newTime === 0) {
-            handleRoundComplete();
-          }
-          return newTime;
-        });
+    if (isRunning && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft(prev => prev - 1);
       }, 1000);
+    } else if (timeLeft === 0) {
+      handleTimerComplete();
     }
 
-    return () => clearInterval(interval);
-  }, [isActive, time]);
+    return () => clearInterval(timer);
+  }, [isRunning, timeLeft]);
 
-  const handleStart = () => {
-    setIsActive(true);
-    toast.success(
-      `Pomodoro Başladı - Tur ${currentRound}/${totalRounds}`,
-      {
-        duration: time * 1000,
-        position: 'top-left',
-        icon: '⏱️',
-      }
-    );
-  };
-
-  const handleStop = () => {
-    setIsActive(false);
-    toast.dismiss();
-  };
-
-  const handleReset = () => {
-    setIsActive(false);
-    setTime(25 * 60);
-    setCurrentRound(1);
-    toast.dismiss();
-  };
-
-  const handleRoundComplete = () => {
-    if (currentRound < totalRounds) {
-      setCurrentRound(prev => prev + 1);
-      setTime(25 * 60);
-      toast.success(`${currentRound}. tur tamamlandı! Yeni tur başlıyor.`, {
-        duration: 3000,
-        position: 'top-left',
-      });
+  /**
+   * @function handleTimerComplete
+   * @desc     Zamanın bittiğinde çalışma ve mola arasında geçiş yapılır
+   */
+  const handleTimerComplete = () => {
+    setIsRunning(false);
+    if (currentMode === 'work') {
+      showToast.success('Çalışma süresi bitti! Mola zamanı.');
+      setCurrentMode('break');
+      setTimeLeft(5 * 60); // 5 dakika mola
     } else {
-      setIsActive(false);
-      setCurrentRound(1);
-      setTime(25 * 60);
-      toast.success('Tüm pomodoro turları tamamlandı!', {
-        duration: 5000,
-        position: 'top-left',
-      });
+      showToast.success('Mola bitti! Çalışma zamanı.');
+      setCurrentMode('work');
+      setTimeLeft(25 * 60);
     }
+  };
+
+  /**
+   * @function formatTime
+   * @desc     Zamanı dakika ve saniye formatına dönüştürür
+   */
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  /**
+   * @function handleReset
+   * @desc     Zamanı sıfırlar ve çalışma ve mola arasında geçiş yapılır
+   */
+  const handleReset = () => {
+    setIsRunning(false);
+    setTimeLeft(currentMode === 'work' ? 25 * 60 : 5 * 60);
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-xl w-96`}>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Pomodoro Zamanlayıcı</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <X size={24} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className={`
+        w-full max-w-md p-6 rounded-lg shadow-xl
+        ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}
+      `}>
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold">
+            {currentMode === 'work' ? 'Çalışma Zamanı' : 'Mola Zamanı'}
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+          >
+            <X className="w-6 h-6" />
           </button>
         </div>
 
-        <div className="text-center my-8">
-          <div className="text-4xl font-bold mb-4">
-            {Math.floor(time / 60)}:{(time % 60).toString().padStart(2, '0')}
+        {/* Timer Display */}
+        <div className="text-center mb-8">
+          <div className="text-6xl font-bold mb-4">
+            {formatTime(timeLeft)}
           </div>
-          <div className="mb-4">
-            Tur: {currentRound}/{totalRounds}
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={() => setIsRunning(!isRunning)}
+              className={`
+                p-3 rounded-full
+                ${isRunning 
+                  ? 'bg-red-500 hover:bg-red-600' 
+                  : 'bg-green-500 hover:bg-green-600'
+                }
+                text-white
+              `}
+            >
+              {isRunning ? <Pause /> : <Play />}
+            </button>
+            <button
+              onClick={handleReset}
+              className="p-3 rounded-full bg-gray-500 hover:bg-gray-600 text-white"
+            >
+              <RotateCcw />
+            </button>
           </div>
         </div>
 
-        <div className="flex justify-center space-x-4">
-          {!isActive ? (
-            <button
-              onClick={handleStart}
-              className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600"
-            >
-              Başlat
-            </button>
-          ) : (
-            <button
-              onClick={handleStop}
-              className="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600"
-            >
-              Durdur
-            </button>
-          )}
+        {/* Mode Selector */}
+        <div className="flex justify-center gap-4 mb-4">
           <button
-            onClick={handleReset}
-            className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600"
+            onClick={() => {
+              setCurrentMode('work');
+              setTimeLeft(25 * 60);
+              setIsRunning(false);
+            }}
+            className={`
+              px-4 py-2 rounded
+              ${currentMode === 'work' 
+                ? 'bg-blue-500 text-white' 
+                : 'bg-gray-200 dark:bg-gray-700'
+              }
+            `}
           >
-            Sıfırla
+            Çalışma
+          </button>
+          <button
+            onClick={() => {
+              setCurrentMode('break');
+              setTimeLeft(5 * 60);
+              setIsRunning(false);
+            }}
+            className={`
+              px-4 py-2 rounded
+              ${currentMode === 'break' 
+                ? 'bg-blue-500 text-white' 
+                : 'bg-gray-200 dark:bg-gray-700'
+              }
+            `}
+          >
+            Mola
           </button>
         </div>
       </div>

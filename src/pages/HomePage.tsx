@@ -1,18 +1,54 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, BarChart2, Users, Brain, Target, Clock } from 'lucide-react';
+/**
+ * @file    HomePage.tsx
+ * @desc    Ana sayfa bileşeni
+ * @details Uygulamanın karşılama sayfası, özellik tanıtımları ve istatistiklerin gösterildiği landing page
+ */
+
+import React, {  useState } from 'react';
+import { Link } from 'react-router-dom';
+import { BarChart2, Users, Brain, Target, Clock, Book } from 'lucide-react';
 import { motion } from 'framer-motion';
 import CameraButton from '../components/CameraButton';
 import { useTheme } from '../context/ThemeContext';
 import FeatureCard from '../components/FeatureCard';
 import PomodoroModal from '../components/PomodoroModal';
 
+/**
+ * @component HomePage
+ * @desc     Ana sayfa bileşeni, kullanıcıları karşılayan ve uygulamanın özelliklerini tanıtan sayfa
+ * @returns  {JSX.Element} Landing page yapısı
+ * 
+ * @states
+ * - isPomodoroOpen: Pomodoro modalının açık/kapalı durumu
+ * 
+ * @animations
+ * - containerVariants: Özellikler bölümü için kapsayıcı animasyon ayarları
+ * - itemVariants: Her bir özellik kartı için animasyon ayarları
+ * 
+ * @sections
+ * - Hero: Karşılama bölümü ve çağrı butonu
+ * - Features: Özellikler ve açıklamaları
+ * - Stats: İstatistik kartları
+ * 
+ * @styles
+ * - min-h-screen: Tam ekran yükseklik
+ * - bg-gray-900/bg-gray-50: Tema bazlı arka plan rengi
+ * - text-white/text-gray-800: Tema bazlı metin rengi
+ */
 const HomePage: React.FC = () => {
   const { theme } = useTheme();
   const isAuthenticated = !!localStorage.getItem('token');
   const [isPomodoroOpen, setIsPomodoroOpen] = useState(false);
-  const navigate = useNavigate();
+  const [showPomodoro, setShowPomodoro] = useState(false);
 
+  /**
+   * @constant containerVariants
+   * @desc    Özellikler bölümü için kapsayıcı animasyon konfigürasyonu
+   * @type    {Object}
+   * 
+   * @property {Object} hidden - Başlangıç durumu
+   * @property {Object} visible - Görünür durum ve geçiş ayarları
+   */
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -23,6 +59,14 @@ const HomePage: React.FC = () => {
     }
   };
 
+  /**
+   * @constant itemVariants
+   * @desc    Her bir özellik kartı için animasyon konfigürasyonu
+   * @type    {Object}
+   * 
+   * @property {Object} hidden - Başlangıç durumu (yukarıdan aşağı hareket)
+   * @property {Object} visible - Son durum (normal pozisyon)
+   */
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
@@ -30,6 +74,45 @@ const HomePage: React.FC = () => {
       opacity: 1
     }
   };
+
+  const features = [
+    {
+      title: "Akıllı Öğrenme Sistemi",
+      description: "Yapay zeka destekli öğrenme sistemi ile kişiselleştirilmiş çalışma programı",
+      icon: Brain,
+      onClick: () => console.log("Akıllı Öğrenme tıklandı")
+    },
+    {
+      title: "Hedef Odaklı",
+      description: "Hedeflerinize uygun çalışma stratejileri ve başarı takibi",
+      icon: Target,
+      onClick: () => console.log("Hedef Odaklı tıklandı")
+    },
+    {
+      title: "Zaman Yönetimi",
+      description: "Verimli çalışma planları ve zaman yönetimi araçları",
+      icon: Clock,
+      onClick: () => setShowPomodoro(true)
+    },
+    {
+      title: "Konu Özetleri",
+      description: "Tüm YKS konularına ait özet ve püf noktaları",
+      icon: Book,
+      onClick: () => console.log("Konu Özetleri tıklandı")
+    },
+    {
+      title: "Performans Analizi",
+      description: "Detaylı istatistikler ve gelişim grafikleri",
+      icon: BarChart2,
+      onClick: () => console.log("Performans Analizi tıklandı")
+    },
+    {
+      title: "Kişiselleştirilmiş",
+      description: "Size özel öneriler ve çalışma teknikleri",
+      icon: Users,
+      onClick: () => console.log("Kişiselleştirilmiş tıklandı")
+    }
+  ];
 
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-800'}`}>
@@ -99,48 +182,16 @@ const HomePage: React.FC = () => {
 
           <div className="mt-10">
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              <motion.div variants={itemVariants}>
-                <FeatureCard
-                  icon={<Brain size={48} className={`${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />}
-                  title="Akıllı Öğrenme Sistemi"
-                  description="Yapay zeka destekli öğrenme sistemi ile kişiselleştirilmiş çalışma programı"
-                />
-              </motion.div>
-              <motion.div variants={itemVariants}>
-                <FeatureCard
-                  icon={<Target size={48} className={`${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />}
-                  title="Hedef Odaklı"
-                  description="Hedeflerinize uygun çalışma stratejileri ve başarı takibi"
-                />
-              </motion.div>
-              <motion.div variants={itemVariants}>
-                <FeatureCard
-                  icon={<Clock size={48} className={`${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />}
-                  title="Zaman Yönetimi"
-                  description="Verimli çalışma planları ve zaman yönetimi araçları"
-                />
-              </motion.div>
-              <motion.div variants={itemVariants}>
-                <FeatureCard
-                  icon={<BookOpen size={48} className={`${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />}
-                  title="Konu Özetleri"
-                  description="Tüm YKS konularına ait özet ve püf noktaları"
-                />
-              </motion.div>
-              <motion.div variants={itemVariants}>
-                <FeatureCard
-                  icon={<BarChart2 size={48} className={`${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />}
-                  title="Performans Analizi"
-                  description="Detaylı istatistikler ve gelişim grafikleri"
-                />
-              </motion.div>
-              <motion.div variants={itemVariants}>
-                <FeatureCard
-                  icon={<Users size={48} className={`${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />}
-                  title="Kişiselleştirilmiş"
-                  description="Size özel öneriler ve çalışma teknikleri"
-                />
-              </motion.div>
+              {features.map((feature, index) => (
+                <motion.div variants={itemVariants} key={index}>
+                  <FeatureCard
+                    icon={<feature.icon className="w-6 h-6 text-blue-500" />}
+                    title={feature.title}
+                    description={feature.description}
+                    onClick={feature.onClick}
+                  />
+                </motion.div>
+              ))}
             </div>
           </div>
         </div>
@@ -175,11 +226,12 @@ const HomePage: React.FC = () => {
         </div>
       </motion.div>
 
+      {/* Authenticated User Tools */}
       {isAuthenticated && (
         <div className="fixed bottom-8 right-8 z-50">
           <CameraButton 
             apiKey={import.meta.env.VITE_API_KEY}
-            model="gemini-1.5-pro"
+            model="gemini-1.5-flash-latest"
             className="shadow-lg hover:shadow-xl transition-shadow duration-300"
           />
         </div>
@@ -190,6 +242,14 @@ const HomePage: React.FC = () => {
         isOpen={isPomodoroOpen}
         onClose={() => setIsPomodoroOpen(false)}
       />
+
+      {/* Pomodoro Modal */}
+      {showPomodoro && (
+        <PomodoroModal 
+          isOpen={showPomodoro} 
+          onClose={() => setShowPomodoro(false)}
+        />
+      )}
     </div>
   );
 };

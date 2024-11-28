@@ -1,9 +1,17 @@
 import asyncHandler from 'express-async-handler';
 import TestTrack from '../models/testTrackModel.js';
 
-// @desc    Deneme ekle
-// @route   POST /api/testtrack
-// @access  Private
+/**
+ * @desc    Yeni deneme sınavı kaydı oluşturur
+ * @route   POST /api/testtrack
+ * @access  Private
+ * @param   {string} examName - Deneme sınavı adı
+ * @param   {string} examType - Sınav türü (TYT/AYT)
+ * @param   {array} subjects - Sınav konuları
+ * @param   {string} aytField - AYT alan türü (Sayısal/Eşit Ağırlık/Sözel)
+ * @param   {string} linkedExamId - Bağlantılı sınav ID'si (opsiyonel)
+ * @returns {object} Oluşturulan deneme sınavı bilgileri
+ */
 const addTestTrack = asyncHandler(async (req, res) => {
   const { examName, examType, subjects, aytField, linkedExamId } = req.body;
 
@@ -30,9 +38,12 @@ const addTestTrack = asyncHandler(async (req, res) => {
   res.status(201).json(testTrack);
 });
 
-// @desc    Denemeleri getir
-// @route   GET /api/testtrack
-// @access  Private
+/**
+ * @desc    Kullanıcının tüm deneme sınavlarını getirir
+ * @route   GET /api/testtrack
+ * @access  Private
+ * @returns {array} Deneme sınavları listesi (bağlantılı sınavlar dahil)
+ */
 const getTestTracks = asyncHandler(async (req, res) => {
   const testTracks = await TestTrack.find({ user: req.user._id })
     .populate('linkedExamId', 'examName examType examScore')
@@ -40,9 +51,18 @@ const getTestTracks = asyncHandler(async (req, res) => {
   res.json(testTracks);
 });
 
-// @desc    Deneme güncelle
-// @route   PUT /api/testtrack/:id
-// @access  Private
+/**
+ * @desc    Mevcut deneme sınavını günceller
+ * @route   PUT /api/testtrack/:id
+ * @access  Private
+ * @param   {string} id - Güncellenecek deneme sınavı ID'si
+ * @param   {string} examName - Yeni sınav adı
+ * @param   {string} examType - Yeni sınav türü
+ * @param   {array} subjects - Yeni sınav konuları
+ * @param   {string} aytField - Yeni AYT alan türü
+ * @param   {string} linkedExamId - Yeni bağlantılı sınav ID'si
+ * @returns {object} Güncellenmiş deneme sınavı bilgileri
+ */
 const updateTestTrack = asyncHandler(async (req, res) => {
   const { examName, examType, subjects, aytField, linkedExamId } = req.body;
 
@@ -74,9 +94,13 @@ const updateTestTrack = asyncHandler(async (req, res) => {
   res.json(testTrack);
 });
 
-// @desc    Deneme sil
-// @route   DELETE /api/testtrack/:id
-// @access  Private
+/**
+ * @desc    Deneme sınavını siler
+ * @route   DELETE /api/testtrack/:id
+ * @access  Private
+ * @param   {string} id - Silinecek deneme sınavı ID'si
+ * @returns {object} Silme işlemi onay mesajı
+ */
 const deleteTestTrack = asyncHandler(async (req, res) => {
   const testTrack = await TestTrack.findById(req.params.id);
 
@@ -103,9 +127,14 @@ const deleteTestTrack = asyncHandler(async (req, res) => {
   res.json({ message: 'Deneme silindi' });
 });
 
-// @desc    Bağlı denemeleri getir
-// @route   GET /api/testtrack/linked
-// @access  Private
+/**
+ * @desc    Bağlantılı deneme sınavlarını getirir ve yerleştirme puanlarını hesaplar
+ * @route   GET /api/testtrack/linked
+ * @access  Private
+ * @returns {array} Bağlantılı sınav çiftleri ve yerleştirme puanları
+ * @details TYT ve AYT sınavlarını eşleştirir ve yerleştirme puanını hesaplar
+ *          TYT puanı %40, AYT puanı %60 ağırlığında hesaplanır
+ */
 const getLinkedTestTracks = asyncHandler(async (req, res) => {
   try {
     console.log('getLinkedTestTracks başlatıldı - Kullanıcı ID:', req.user._id);
@@ -162,7 +191,13 @@ const getLinkedTestTracks = asyncHandler(async (req, res) => {
   }
 });
 
-// Yerleştirme puanı hesaplama yardımcı fonksiyonu
+/**
+ * @desc    Yerleştirme puanını hesaplar
+ * @param   {number} score1 - TYT puanı
+ * @param   {number} score2 - AYT puanı
+ * @returns {number|null} Hesaplanan yerleştirme puanı veya null
+ * @details TYT puanının %40'ı ve AYT puanının %60'ı alınarak hesaplanır
+ */
 const calculateFinalScore = (score1, score2) => {
   if (!score1 || !score2) return null;
   return parseFloat((score1 * 0.4 + score2 * 0.6).toFixed(2));

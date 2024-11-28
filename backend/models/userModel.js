@@ -2,6 +2,21 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import defaultPP from '../defaultPP.json' assert { type: 'json' };
 
+/**
+ * @desc    Kullanıcı şeması
+ * @details Sistemdeki kullanıcıların veritabanı modeli
+ * 
+ * @property {String} username - Benzersiz kullanıcı adı
+ * @property {String} email - Benzersiz e-posta adresi
+ * @property {String} password - Şifrelenmiş kullanıcı şifresi
+ * @property {String} profileImage - Profil fotoğrafı URL'si
+ * @property {Object} typeOfIntelligence - Kullanıcının zeka türü bilgileri
+ * @property {Date} createdAt - Hesap oluşturulma tarihi
+ * @property {Date} updatedAt - Son güncelleme tarihi
+ * 
+ * @method matchPassword - Girilen şifreyi kontrol eder
+ * @hook pre-save - Şifre değiştiğinde otomatik şifreleme yapar
+ */
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
@@ -20,6 +35,7 @@ const userSchema = new mongoose.Schema({
   profileImage: {
     type: String,
     default: null,
+    maxLength: 5242880 // 5MB
   },
   typeOfIntelligence: {
     type: Object,

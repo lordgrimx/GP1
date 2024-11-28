@@ -2,14 +2,33 @@ import React from 'react';
 import { Line } from 'react-chartjs-2';
 import { useTheme } from '../context/ThemeContext';
 
+/**
+ * Haftalık ilerleme grafiği için prop tipleri tanımlaması
+ * @interface WeeklyProgressChartProps
+ * @property {number[]} data - Grafik için gösterilecek ilerleme verileri dizisi
+ * @property {string[]} labels - Grafik ekseni için etiket dizisi
+ */
 interface WeeklyProgressChartProps {
   data: number[];
   labels: string[];
 }
 
+/**
+ * Haftalık ilerleme durumunu gösteren çizgi grafik bileşeni
+ * @component
+ * @param {WeeklyProgressChartProps} props - Bileşen props'ları
+ * @param {number[]} props.data - İlerleme yüzdeleri dizisi
+ * @param {string[]} props.labels - Grafik etiketleri dizisi
+ * @returns {JSX.Element} Line chart bileşeni
+ */
 const WeeklyProgressChart: React.FC<WeeklyProgressChartProps> = ({ data, labels }) => {
   const { theme } = useTheme();
   
+  /**
+   * Chart.js için veri konfigürasyonu
+   * @constant
+   * @type {Object}
+   */
   const chartData = {
     labels: labels,
     datasets: [
@@ -26,6 +45,11 @@ const WeeklyProgressChart: React.FC<WeeklyProgressChartProps> = ({ data, labels 
     ],
   };
 
+  /**
+   * Chart.js için görünüm ve davranış ayarları
+   * @constant
+   * @type {Object}
+   */
   const options = {
     responsive: true,
     maintainAspectRatio: false,
@@ -54,6 +78,11 @@ const WeeklyProgressChart: React.FC<WeeklyProgressChartProps> = ({ data, labels 
       },
       tooltip: {
         callbacks: {
+          /**
+           * Tooltip içeriğini özelleştiren callback fonksiyonu
+           * @param {Object} context - Chart.js tooltip context objesi
+           * @returns {string} Formatlanmış tooltip metni
+           */
           label: function(context: any) {
             return `İlerleme: ${context.parsed.y}%`;
           }

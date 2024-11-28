@@ -14,7 +14,20 @@ import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Tüm route'ları protect middleware'i ile koruyalım
+/**
+ * @desc    Ders ve konu route'ları
+ * @routes
+ *   GET /api/subjects - Tüm dersleri getir (Protected)
+ *   POST /api/subjects - Yeni ders ekle (Protected)
+ *   GET /api/subjects/names - Ders adlarını getir (Protected)
+ *   GET /api/subjects/tyt - TYT derslerini getir (Protected)
+ *   GET /api/subjects/ayt - AYT derslerini getir (Protected)
+ *   GET /api/subjects/:id - Belirli bir dersi getir (Protected)
+ *   PUT /api/subjects/:id - Ders güncelle (Protected)
+ *   DELETE /api/subjects/:id - Ders sil (Protected)
+ *   POST /api/subjects/:id/proficiency - Konu yeterliliği güncelle (Protected)
+ * @note    Tüm route'lar protect middleware'i ile korunmaktadır
+ */
 router.use(protect);
 
 // Artık her route korunuyor

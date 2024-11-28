@@ -191,7 +191,6 @@ const TestTrackPage: React.FC = () => {
    * @desc  Sayfa state'leri
    */
   const [tracks, setTracks] = useState<Track[]>([]);
-  const [linkedPairs, setLinkedPairs] = useState<{[key: string]: number}>({});
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingTrackId, setEditingTrackId] = useState<string | null>(null);
@@ -205,8 +204,6 @@ const TestTrackPage: React.FC = () => {
   // Form verisi için ayrı state
   const [formData, setFormData] = useState<FormState>(initialFormState);
 
-  // Bağlı denemelerin yerleştirme puanlarını takip et
-  const linkedScores = useLinkedExamsScore(tracks);
 
   // Verileri getir
   const [linkedResponse, setLinkedResponse] = useState<{ data: LinkedPair[] } | null>(null);

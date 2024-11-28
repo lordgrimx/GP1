@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: controllers/quizController.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: controllers/quizController.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import Quiz from '../models/quizModel.js';
+import QuizAttempt from '../models/quizAttemptModel.js';
+
+/**
+ * @desc    Yeni quiz oluşturur
+ * @route   POST /api/quizzes
+ * @access  Private
+ * @param   {string} title - Quiz başlığı
+ * @param   {array} questions - Quiz soruları listesi
+ * @returns {object} Oluşturulan quiz bilgileri
+ */
+export const createQuiz = async (req, res) => {
+  try {
+    const { title, questions } = req.body;
+    const quiz = await Quiz.create({ title, questions });
+    res.status(201).json(quiz);
+  } catch (error) {
+    res.status(400).json({ message: 'Failed to create quiz' });
+  }
+};
+
+/**
+ * @desc    Tüm quizleri getirir
+ * @route   GET /api/quizzes
+ * @access  Public
+ * @returns {array} Quizlerin listesi
+ */
+export const getQuizzes = async (req, res) => {
+  try {
+    const quizzes = await Quiz.find({});
+    res.json(quizzes);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+/**
+ * @desc    Belirli bir quizi ID'ye göre getirir
+ * @route   GET /api/quizzes/:id
+ * @access  Public
+ * @param   {string} id - Quiz ID'si
+ * @returns {object} Quiz detayları
+ */
+export const getQuizById = async (req, res) => {
+  try {
+    const quiz = await Quiz.findById(req.params.id);
+    if (quiz) {
+      res.json(quiz);
+    } else {
+      res.status(404).json({ message: 'Quiz not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+/**
+ * @desc    Quiz denemesi sonucunu kaydeder
+ * @route   POST /api/quizzes/:id/submit
+ * @access  Private
+ * @param   {string} id - Quiz ID'si
+ * @param   {array} answers - Kullanıcının cevapları
+ * @returns {object} Quiz denemesi sonuçları
+ * @details Kullanıcının cevaplarını kontrol eder, 
+ *          skor hesaplar ve sonucu kaydeder
+ */
+export const submitQuizAttempt = async (req, res) => {
+  try {
+    const { answers } = req.body;
+    const quiz = await Quiz.findById(req.params.id);
+    if (!quiz) {
+      return res.status(404).json({ message: 'Quiz not found' });
+    }
+
+    let score = 0;
+    quiz.questions.forEach((question, index) => {
+      if (question.correctAnswer === answers[index]) {
+        score++;
+      }
+    });
+
+    const attempt = await QuizAttempt.create({
+      user: req.user._id,
+      quiz: quiz._id,
+      score,
+      answers
+    });
+
+    res.status(201).json(attempt);
+  } catch (error) {
+    res.status(400).json({ message: 'Failed to submit quiz attempt' });
+  }
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#PORT">PORT</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#calculateFinalScore">calculateFinalScore</a></li><li><a href="global.html#calculateStudyStreak">calculateStudyStreak</a></li><li><a href="global.html#calculateWeeklyProgress">calculateWeeklyProgress</a></li><li><a href="global.html#checkUserExists">checkUserExists</a></li><li><a href="global.html#generateToken">generateToken</a></li><li><a href="global.html#getAYTSubjects">getAYTSubjects</a></li><li><a href="global.html#getQuizById">getQuizById</a></li><li><a href="global.html#getQuizzes">getQuizzes</a></li><li><a href="global.html#getSubjectById">getSubjectById</a></li><li><a href="global.html#getSubjectNames">getSubjectNames</a></li><li><a href="global.html#getSubjects">getSubjects</a></li><li><a href="global.html#getTYTSubjects">getTYTSubjects</a></li><li><a href="global.html#loginUser">loginUser</a></li><li><a href="global.html#matchPassword-Girilen%25C5%259Fifreyikontroleder">matchPassword - Girilen şifreyi kontrol eder</a></li><li><a href="global.html#protect">protect</a></li><li><a href="global.html#questionSchema">questionSchema</a></li><li><a href="global.html#quizAttemptSchema">quizAttemptSchema</a></li><li><a href="global.html#quizSchema">quizSchema</a></li><li><a href="global.html#registerUser">registerUser</a></li><li><a href="global.html#subjectSchema">subjectSchema</a></li><li><a href="global.html#testResultSchema">testResultSchema</a></li><li><a href="global.html#testTrackSchema">testTrackSchema</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri Nov 29 2024 01:45:32 GMT+0300 (GMT+03:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

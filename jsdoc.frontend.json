@@ -1,0 +1,39 @@
+{
+    "source": {
+        "include": ["src"],
+        "includePattern": ".+\\.(js|jsx|ts|tsx)$",
+        "excludePattern": "(node_modules/|docs|.test.)"
+    },
+    "plugins": [
+        "plugins/markdown",
+        "node_modules/jsdoc-plugin-typescript"
+    ],
+    "opts": {
+        "encoding": "utf8",
+        "destination": "./docs/frontend/",
+        "recurse": true,
+        "verbose": true
+    },
+    "tags": {
+        "allowUnknownTags": ["typescript", "param", "returns", "component", "interface"],
+        "dictionaries": ["jsdoc", "typescript"]
+    },
+    "typescript": {
+        "moduleRoot": "src",
+        "allowJs": true,
+        "checkJs": false
+    },
+    "templates": {
+        "cleverLinks": false,
+        "monospaceLinks": false
+    },
+    "babel": {
+        "extensions": ["ts", "tsx"],
+        "ignore": ["**/*.(test|spec).ts"],
+        "babelrc": false,
+        "presets": [
+            ["@babel/preset-typescript", { "allowNamespaces": true }],
+            ["@babel/preset-react", { "runtime": "automatic" }]
+        ]
+    }
+} 

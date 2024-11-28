@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: backend/controllers/testTrackController.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: backend/controllers/testTrackController.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import asyncHandler from 'express-async-handler';
+import TestTrack from '../models/testTrackModel.js';
+
+/**
+ * @desc    Yeni deneme sınavı kaydı oluşturur
+ * @route   POST /api/testtrack
+ * @access  Private
+ * @param   {string} examName - Deneme sınavı adı
+ * @param   {string} examType - Sınav türü (TYT/AYT)
+ * @param   {array} subjects - Sınav konuları
+ * @param   {string} aytField - AYT alan türü (Sayısal/Eşit Ağırlık/Sözel)
+ * @param   {string} linkedExamId - Bağlantılı sınav ID'si (opsiyonel)
+ * @returns {object} Oluşturulan deneme sınavı bilgileri
+ */
+const addTestTrack = asyncHandler(async (req, res) => {
+  const { examName, examType, subjects, aytField, linkedExamId } = req.body;
+
+  if (!examName || !examType) {
+    res.status(400);
+    throw new Error('Lütfen tüm gerekli alanları doldurun');
+  }
+
+  // AYT için alan kontrolü
+  if (examType === 'AYT' &amp;&amp; !aytField) {
+    res.status(400);
+    throw new Error('AYT için alan seçimi zorunludur');
+  }
+
+  const testTrack = await TestTrack.create({
+    user: req.user._id,
+    examName,
+    examType,
+    ...(aytField &amp;&amp; { aytField }),
+    subjects,
+    ...(linkedExamId &amp;&amp; { linkedExamId })
+  });
+
+  res.status(201).json(testTrack);
+});
+
+/**
+ * @desc    Kullanıcının tüm deneme sınavlarını getirir
+ * @route   GET /api/testtrack
+ * @access  Private
+ * @returns {array} Deneme sınavları listesi (bağlantılı sınavlar dahil)
+ */
+const getTestTracks = asyncHandler(async (req, res) => {
+  const testTracks = await TestTrack.find({ user: req.user._id })
+    .populate('linkedExamId', 'examName examType examScore')
+    .sort('-createdAt');
+  res.json(testTracks);
+});
+
+/**
+ * @desc    Mevcut deneme sınavını günceller
+ * @route   PUT /api/testtrack/:id
+ * @access  Private
+ * @param   {string} id - Güncellenecek deneme sınavı ID'si
+ * @param   {string} examName - Yeni sınav adı
+ * @param   {string} examType - Yeni sınav türü
+ * @param   {array} subjects - Yeni sınav konuları
+ * @param   {string} aytField - Yeni AYT alan türü
+ * @param   {string} linkedExamId - Yeni bağlantılı sınav ID'si
+ * @returns {object} Güncellenmiş deneme sınavı bilgileri
+ */
+const updateTestTrack = asyncHandler(async (req, res) => {
+  const { examName, examType, subjects, aytField, linkedExamId } = req.body;
+
+  if (!examName || !examType) {
+    res.status(400);
+    throw new Error('Lütfen tüm gerekli alanları doldurun');
+  }
+
+  // AYT için alan kontrolü
+  if (examType === 'AYT' &amp;&amp; !aytField) {
+    res.status(400);
+    throw new Error('AYT için alan seçimi zorunludur');
+  }
+
+  const updateData = {
+    examName,
+    examType,
+    ...(aytField &amp;&amp; { aytField }),
+    subjects,
+    ...(linkedExamId &amp;&amp; { linkedExamId })
+  };
+
+  const testTrack = await TestTrack.findByIdAndUpdate(
+    req.params.id,
+    updateData,
+    { new: true, runValidators: true }
+  );
+
+  res.json(testTrack);
+});
+
+/**
+ * @desc    Deneme sınavını siler
+ * @route   DELETE /api/testtrack/:id
+ * @access  Private
+ * @param   {string} id - Silinecek deneme sınavı ID'si
+ * @returns {object} Silme işlemi onay mesajı
+ */
+const deleteTestTrack = asyncHandler(async (req, res) => {
+  const testTrack = await TestTrack.findById(req.params.id);
+
+  if (!testTrack) {
+    res.status(404);
+    throw new Error('Deneme bulunamadı');
+  }
+
+  if (testTrack.user.toString() !== req.user._id.toString()) {
+    res.status(401);
+    throw new Error('Yetkisiz erişim');
+  }
+
+  // Bağlı denemenin bağlantısını temizle
+  if (testTrack.linkedExamId) {
+    await TestTrack.findByIdAndUpdate(testTrack.linkedExamId, {
+      $unset: { linkedExamId: "" }
+    });
+  }
+
+  // remove() yerine deleteOne() kullan
+  await TestTrack.deleteOne({ _id: req.params.id });
+  
+  res.json({ message: 'Deneme silindi' });
+});
+
+/**
+ * @desc    Bağlantılı deneme sınavlarını getirir ve yerleştirme puanlarını hesaplar
+ * @route   GET /api/testtrack/linked
+ * @access  Private
+ * @returns {array} Bağlantılı sınav çiftleri ve yerleştirme puanları
+ * @details TYT ve AYT sınavlarını eşleştirir ve yerleştirme puanını hesaplar
+ *          TYT puanı %40, AYT puanı %60 ağırlığında hesaplanır
+ */
+const getLinkedTestTracks = asyncHandler(async (req, res) => {
+  try {
+    console.log('getLinkedTestTracks başlatıldı - Kullanıcı ID:', req.user._id);
+    
+    const tracks = await TestTrack.find({ user: req.user._id });
+    console.log('Bulunan toplam deneme sayısı:', tracks.length);
+    
+    const linkedPairs = [];
+
+    for (const track of tracks) {
+      console.log('İşlenen deneme:', {
+        id: track._id,
+        examName: track.examName,
+        examType: track.examType,
+        examScore: track.examScore,
+        linkedExamId: track.linkedExamId
+      });
+
+      if (track.linkedExamId) {
+        const linkedExam = await TestTrack.findById(track.linkedExamId);
+        console.log('Bağlı deneme bulundu:', {
+          id: linkedExam?._id,
+          examName: linkedExam?.examName,
+          examType: linkedExam?.examType,
+          examScore: linkedExam?.examScore
+        });
+
+        if (linkedExam &amp;&amp; linkedExam.examType === 'TYT') {
+          const finalScore = calculateFinalScore(linkedExam.examScore, track.examScore);
+          console.log('Hesaplanan yerleştirme puanı:', {
+            tytScore: linkedExam.examScore,
+            aytScore: track.examScore,
+            finalScore: finalScore
+          });
+          
+          await TestTrack.findByIdAndUpdate(track._id, { finalScore });
+          await TestTrack.findByIdAndUpdate(linkedExam._id, { finalScore });
+
+          linkedPairs.push({
+            exam1: linkedExam,
+            exam2: track,
+            finalScore
+          });
+        }
+      }
+    }
+
+    console.log('Toplam bağlı deneme çifti sayısı:', linkedPairs.length);
+    res.json(linkedPairs);
+    
+  } catch (error) {
+    console.error('getLinkedTestTracks hatası:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+/**
+ * @desc    Yerleştirme puanını hesaplar
+ * @param   {number} score1 - TYT puanı
+ * @param   {number} score2 - AYT puanı
+ * @returns {number|null} Hesaplanan yerleştirme puanı veya null
+ * @details TYT puanının %40'ı ve AYT puanının %60'ı alınarak hesaplanır
+ */
+const calculateFinalScore = (score1, score2) => {
+  if (!score1 || !score2) return null;
+  return parseFloat((score1 * 0.4 + score2 * 0.6).toFixed(2));
+};
+
+export {
+  getTestTracks,
+  addTestTrack,
+  updateTestTrack,
+  deleteTestTrack,
+  getLinkedTestTracks
+}; </code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#PORT">PORT</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#calculateFinalScore">calculateFinalScore</a></li><li><a href="global.html#calculateStudyStreak">calculateStudyStreak</a></li><li><a href="global.html#calculateWeeklyProgress">calculateWeeklyProgress</a></li><li><a href="global.html#checkUserExists">checkUserExists</a></li><li><a href="global.html#createRoot">createRoot</a></li><li><a href="global.html#generateToken">generateToken</a></li><li><a href="global.html#getAYTSubjects">getAYTSubjects</a></li><li><a href="global.html#getQuizById">getQuizById</a></li><li><a href="global.html#getQuizzes">getQuizzes</a></li><li><a href="global.html#getSubjectById">getSubjectById</a></li><li><a href="global.html#getSubjectNames">getSubjectNames</a></li><li><a href="global.html#getSubjects">getSubjects</a></li><li><a href="global.html#getTYTSubjects">getTYTSubjects</a></li><li><a href="global.html#loginUser">loginUser</a></li><li><a href="global.html#matchPassword-Girilen%25C5%259Fifreyikontroleder">matchPassword - Girilen şifreyi kontrol eder</a></li><li><a href="global.html#protect">protect</a></li><li><a href="global.html#questionSchema">questionSchema</a></li><li><a href="global.html#quizAttemptSchema">quizAttemptSchema</a></li><li><a href="global.html#quizSchema">quizSchema</a></li><li><a href="global.html#registerUser">registerUser</a></li><li><a href="global.html#rootElement">rootElement</a></li><li><a href="global.html#subjectSchema">subjectSchema</a></li><li><a href="global.html#testResultSchema">testResultSchema</a></li><li><a href="global.html#testTrackSchema">testTrackSchema</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri Nov 29 2024 01:42:06 GMT+0300 (GMT+03:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

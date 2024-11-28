@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: backend/controllers/subjectController.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: backend/controllers/subjectController.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import Subject from '../models/subjectModel.js';
+
+/**
+ * @desc    Tüm dersleri getirir
+ * @route   GET /api/subjects
+ * @access  Public
+ * @returns {array} Tüm derslerin listesi
+ */
+export const getSubjects = async (req, res) => {
+  try {
+    const subjects = await Subject.find({});
+    res.json(subjects);
+  } catch (error) {
+    console.error('Error fetching subjects:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+/**
+ * @desc    Belirli bir dersi ID'ye göre getirir
+ * @route   GET /api/subjects/:id
+ * @access  Public
+ * @param   {string} id - Ders ID'si
+ * @returns {object} Ders detayları
+ */
+export const getSubjectById = async (req, res) => {
+  try {
+    const subject = await Subject.findById(req.params.id);
+    if (subject) {
+      res.json(subject);
+    } else {
+      res.status(404).json({ message: 'Subject not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching subject by ID:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+/**
+ * @desc    Yeni bir ders ekler
+ * @route   POST /api/subjects
+ * @access  Private
+ * @param   {string} lesson - Ders adı
+ * @param   {number} questionNumber - Soru sayısı
+ * @param   {array} subjects - Alt konular listesi
+ * @returns {object} Oluşturulan ders bilgileri
+ */
+export const addSubject = async (req, res) => {
+  const { lesson, questionNumber, subjects } = req.body;
+
+  try {
+    const newSubject = new Subject({
+      lesson,
+      questionNumber,
+      subjects,
+    });
+
+    const savedSubject = await newSubject.save();
+    res.status(201).json(savedSubject);
+  } catch (error) {
+    console.error('Error adding subject:', error);
+    res.status(400).json({ message: 'Failed to add subject' });
+  }
+};
+
+/**
+ * @desc    Mevcut bir dersi günceller
+ * @route   PUT /api/subjects/:id
+ * @access  Private
+ * @param   {string} id - Güncellenecek ders ID'si
+ * @param   {string} lesson - Yeni ders adı
+ * @param   {number} questionNumber - Yeni soru sayısı
+ * @param   {array} subjects - Yeni alt konular listesi
+ * @returns {object} Güncellenmiş ders bilgileri
+ */
+export const updateSubject = async (req, res) => {
+  const { lesson, questionNumber, subjects } = req.body;
+
+  try {
+    const subject = await Subject.findById(req.params.id);
+
+    if (subject) {
+      subject.lesson = lesson || subject.lesson;
+      subject.questionNumber = questionNumber || subject.questionNumber;
+      subject.subjects = subjects || subject.subjects;
+
+      const updatedSubject = await subject.save();
+      res.json(updatedSubject);
+    } else {
+      res.status(404).json({ message: 'Subject not found' });
+    }
+  } catch (error) {
+    console.error('Error updating subject:', error);
+    res.status(400).json({ message: 'Failed to update subject' });
+  }
+};
+
+/**
+ * @desc    Bir dersi siler
+ * @route   DELETE /api/subjects/:id
+ * @access  Private
+ * @param   {string} id - Silinecek ders ID'si
+ * @returns {object} Silme işlemi onay mesajı
+ */
+export const deleteSubject = async (req, res) => {
+  try {
+    const subject = await Subject.findById(req.params.id);
+
+    if (subject) {
+      await subject.remove();
+      res.json({ message: 'Subject removed' });
+    } else {
+      res.status(404).json({ message: 'Subject not found' });
+    }
+  } catch (error) {
+    console.error('Error deleting subject:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+/**
+ * @desc    Tüm ders adlarını getirir
+ * @route   GET /api/subjects/names
+ * @access  Public
+ * @returns {array} Ders adları listesi
+ */
+export const getSubjectNames = async (req, res) => {
+  try {
+    const subjects = await Subject.find({}).select('Lesson -_id');
+    console.log(subjects)
+    const subjectNames = subjects.map(subject => subject.Lesson);
+    console.log(subjectNames)
+    res.json(subjectNames);
+  } catch (error) {
+    console.error('Error fetching subject names:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+/**
+ * @desc    TYT derslerini getirir
+ * @route   GET /api/subjects/tyt
+ * @access  Public
+ * @returns {array} TYT dersleri listesi
+ * @details Ders adı "TYT" ile başlayan dersleri filtreler
+ */
+export const getTYTSubjects = async (req, res) => {
+  try {
+    const subjects = await Subject.find({
+      Lesson: { $regex: '^TYT', $options: 'i' }
+    }).select('Lesson questionNumber subjects');
+    
+    if (!subjects || subjects.length === 0) {
+      return res.status(404).json({ message: 'TYT dersleri bulunamadı' });
+    }
+    
+    res.json(subjects);
+  } catch (error) {
+    console.error('TYT dersleri getirilirken hata:', error);
+    res.status(500).json({ 
+      message: 'TYT dersleri alınırken bir hata oluştu', 
+      error: error.message 
+    });
+  }
+};
+
+/**
+ * @desc    AYT derslerini getirir
+ * @route   GET /api/subjects/ayt
+ * @access  Public
+ * @returns {array} AYT dersleri listesi
+ * @details Ders adı "AYT" ile başlayan dersleri filtreler
+ */
+export const getAYTSubjects = async (req, res) => {
+  try {
+    const subjects = await Subject.find({
+      Lesson: { $regex: '^AYT', $options: 'i' }
+    }).select('Lesson questionNumber subjects');
+    
+    if (!subjects || subjects.length === 0) {
+      return res.status(404).json({ message: 'AYT dersleri bulunamadı' });
+    }
+    
+    res.json(subjects);
+  } catch (error) {
+    console.error('AYT dersleri getirilirken hata:', error);
+    res.status(500).json({ 
+      message: 'AYT dersleri alınırken bir hata oluştu', 
+      error: error.message 
+    });
+  }
+};
+
+/**
+ * @desc    Bir konunun yeterlilik seviyesini günceller
+ * @route   PUT /api/subjects/:id/proficiency
+ * @access  Private
+ * @param   {string} id - Ders ID'si
+ * @param   {string} topicName - Konu adı
+ * @param   {number} level - Yeterlilik seviyesi
+ * @returns {object} Güncelleme durumu ve yeni seviye bilgisi
+ */
+export const updateSubjectProficiency = async (req, res) => {
+  try {
+    const { topicName, level } = req.body;
+    const subject = await Subject.findById(req.params.id);
+
+    if (!subject) {
+      return res.status(404).json({ message: 'Konu bulunamadı' });
+    }
+
+    // Eğer proficiencyLevels henüz oluşturulmadıysa, yeni bir Map oluştur
+    if (!subject.proficiencyLevels) {
+      subject.proficiencyLevels = new Map();
+    }
+
+    // Proficiency seviyesini güncelle
+    subject.proficiencyLevels.set(topicName, level);
+    
+    // Değişiklikleri kaydet
+    await subject.save();
+
+    res.json({ 
+      message: 'Seviye başarıyla güncellendi',
+      level: level,
+      topicName: topicName
+    });
+  } catch (error) {
+    console.error('Seviye güncellenirken hata:', error);
+    res.status(500).json({ 
+      message: 'Server error',
+      error: error.message 
+    });
+  }
+};
+
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#PORT">PORT</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#calculateFinalScore">calculateFinalScore</a></li><li><a href="global.html#calculateStudyStreak">calculateStudyStreak</a></li><li><a href="global.html#calculateWeeklyProgress">calculateWeeklyProgress</a></li><li><a href="global.html#checkUserExists">checkUserExists</a></li><li><a href="global.html#createRoot">createRoot</a></li><li><a href="global.html#generateToken">generateToken</a></li><li><a href="global.html#getAYTSubjects">getAYTSubjects</a></li><li><a href="global.html#getQuizById">getQuizById</a></li><li><a href="global.html#getQuizzes">getQuizzes</a></li><li><a href="global.html#getSubjectById">getSubjectById</a></li><li><a href="global.html#getSubjectNames">getSubjectNames</a></li><li><a href="global.html#getSubjects">getSubjects</a></li><li><a href="global.html#getTYTSubjects">getTYTSubjects</a></li><li><a href="global.html#loginUser">loginUser</a></li><li><a href="global.html#matchPassword-Girilen%25C5%259Fifreyikontroleder">matchPassword - Girilen şifreyi kontrol eder</a></li><li><a href="global.html#protect">protect</a></li><li><a href="global.html#questionSchema">questionSchema</a></li><li><a href="global.html#quizAttemptSchema">quizAttemptSchema</a></li><li><a href="global.html#quizSchema">quizSchema</a></li><li><a href="global.html#registerUser">registerUser</a></li><li><a href="global.html#rootElement">rootElement</a></li><li><a href="global.html#subjectSchema">subjectSchema</a></li><li><a href="global.html#testResultSchema">testResultSchema</a></li><li><a href="global.html#testTrackSchema">testTrackSchema</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri Nov 29 2024 01:42:06 GMT+0300 (GMT+03:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

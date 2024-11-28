@@ -4,8 +4,7 @@
  * @details Uygulama özelliklerini görsel ve açıklama ile gösteren kart bileşeni
  */
 
-import React, { ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { ReactNode } from 'react';
 import { useTheme } from '../context/ThemeContext';
 
 /**

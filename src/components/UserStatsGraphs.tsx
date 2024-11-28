@@ -3,7 +3,7 @@
  * @desc    Kullanıcı istatistiklerini görselleştiren grafik bileşeni
  * @details Kullanıcının zeka türü dağılımı, test sonuçları gelişimi ve net sayısı gelişimi gibi istatistikleri görselleştirir
  */
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Line, Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,

@@ -4,14 +4,14 @@
  * @details Uygulama genelinde karanlık/aydınlık tema değişimini yöneten context yapısı
  */
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 /**
  * @type     Theme
  * @desc     Tema seçenekleri için tip tanımı
  * @values   'light' | 'dark'
  */
-type Theme = 'light' | 'dark';
+export type Theme = 'light' | 'dark';
 
 /**
  * @interface ThemeContextType

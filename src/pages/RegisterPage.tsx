@@ -150,12 +150,6 @@ const RegisterPage: React.FC = () => {
       : 'bg-white border-gray-300'
   }`;
 
-  const formClass = `max-w-md mx-auto p-8 rounded-lg shadow-lg ${
-    theme === 'dark' 
-      ? 'bg-gray-800 text-white' 
-      : 'bg-white'
-  }`;
-
   const handleTestSubmit = async (sonuc: any) => {
     try {
       const response = await register({
